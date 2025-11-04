@@ -1,0 +1,20 @@
+{
+  "name": "prioryweb",
+  "version": "1.0.0",
+  "description": "A search engine for resources in Priory posted and hosted by people we care. *Not officially affiliated with Woodside Priory School for any legal purpose.*",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/williamwutq/prioryweb.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/williamwutq/prioryweb/issues"
+  },
+  "homepage": "https://github.com/williamwutq/prioryweb#readme"
+}
