@@ -16,5 +16,6 @@
   "bugs": {
     "url": "https://github.com/williamwutq/prioryweb/issues"
   },
+  "type": "module",
   "homepage": "https://github.com/williamwutq/prioryweb#readme"
 }
