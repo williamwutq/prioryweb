@@ -1,0 +1,85 @@
+.normal-text {
+    font-family: 'Nunito Sans', sans-serif;
+}
+
+.title-text {
+    font-family: 'Lato', sans-serif;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.sans {
+    font-family: 'Open Sans', sans-serif !important;
+}
+
+.serif {
+    font-family: 'Georgia', serif !important;
+}
+
+:root {
+    --color-dark: #05A;
+    --color-medium: #39C;
+    --color-light: #7BE;
+    --accent-dark: #3A5;
+    --accent-medium: #6D6;
+    --accent-light: #8C7;
+    --error: #E43;
+    --warning: #EA0;
+    --dark: #333;
+    --black: #000;
+    --light: #DFF;
+    --white: #FFF;
+}
+
+body {
+    background-color: var(--light);
+    color: var(--dark);
+}
+
+.light-text {
+    color: var(--light);
+}
+
+.light-text::selection {
+    background-color: var(--light);
+    color: var(--dark);
+}
+
+.white-text {
+    color: var(--white);
+}
+
+.white-text::selection {
+    background-color: var(--white);
+    color: var(--dark);
+}
+
+.color-text {
+    color: var(--color-dark);
+}
+
+.color-text::selection {
+    background-color: var(--color-dark);
+    color: var(--light);
+}
+
+.accent-text {
+    color: var(--accent-dark);
+}
+
+.accent-text::selection {
+    background-color: var(--accent-dark);
+    color: var(--light);
+}
+
+.color-block-hoverable {
+    background-color: var(--color-dark);
+    border-color: var(--color-dark);
+    transition: background-color 0.5s;
+    cursor: pointer;
+}
+
+.color-block-hoverable:hover {
+    background-color: var(--color-medium);
+    border-color: var(--color-medium);
+}
