@@ -256,7 +256,7 @@ void _cp_base32_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offs
             continue;
         }
         // Pattern: &nbsp; or &#160; for web representation of non-breaking space
-        if (strncmp(&str[i], "&nbsp;", 6) == 0 || strncmp(&str[i], "&#160;", 6) == 0) {
+        if (_cp_buffer_bufcomp(str, _cp_buffer_from_cstr_const("&nbsp;"), index, 0, 6) == 0 || _cp_buffer_bufcomp(str, _cp_buffer_from_cstr_const("&#160;"), index, 0, 6) == 0) {
             _cp_base32_encode_nbsp(buf, offset, index++);
             i += 5; // Skip next 5 characters
             continue;
