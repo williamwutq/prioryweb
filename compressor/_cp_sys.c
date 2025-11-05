@@ -9,6 +9,19 @@ const uint16_t DEFAULT_SIZE = 256 * 16;
 const int DEBUG = 1;// Set to 1 to enable debug messages
 const bool false = 0;
 const bool true = 1;
+const compare_t inf_larger = 2;
+const compare_t larger = 1;
+const compare_t equal = 0;
+const compare_t smaller = -1;
+const compare_t inf_smaller = -2;
+const compare_t undefined = -128;
+
+bool is_larger(const compare_t cmp) {
+    return cmp == larger || cmp == inf_larger;
+}
+bool is_smaller(const compare_t cmp) {
+    return cmp == smaller || cmp == inf_smaller;
+}
 
 // System
 void _cp_init(){
@@ -261,4 +274,28 @@ void _cp_buffer_concat_inplace(_cp_Buffer* dest, const _cp_Buffer* src) {
     }
     memcpy(dest->data + dest->size, src->data, src->size);
     dest->size += src->size;
+}
+
+compare_t _cp_buffer_bufcomp(const _cp_Buffer* buf1, const _cp_Buffer* buf2, size_t offset1, size_t offset2, size_t length) {
+    if (buf1 == NULL || buf2 == NULL) return undefined;
+    if (offset1 >= buf1->size || offset2 >= buf2->size) return undefined;
+
+    size_t avail1 = buf1->size - offset1;
+    size_t avail2 = buf2->size - offset2;
+
+    size_t minavail = min(avail1, avail2);
+    size_t cmp_len = length == 0 ? minavail : min(length, minavail);
+
+    const byte* p1 = buf1->data + offset1;
+    const byte* p2 = buf2->data + offset2;
+
+    for (size_t i = 0; i < cmp_len; ++i) {
+        if (p1[i] < p2[i]) return smaller;
+        if (p1[i] > p2[i]) return larger;
+    }
+
+    // All compared bytes equal
+    if (avail1 < avail2) return inf_smaller;
+    if (avail1 > avail2) return inf_larger;
+    return equal;
 }

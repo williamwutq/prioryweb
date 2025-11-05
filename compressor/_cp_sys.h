@@ -35,10 +35,85 @@ void _cp_debug(const char* msg);
  */
 void _cp_finish(void);
 
+// Math macros
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#define min_three(a,b,c) ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
+#define max_three(a,b,c) ((a) > (b) ? ((a) > (c) ? (a) : (c)) : ((b) > (c) ? (b) : (c)))
+/**
+ * A byte type representing an 8-bit unsigned value.
+ */
 typedef unsigned char byte;
+/**
+ * A boolean type representing true or false values. Boolean values are values that are either true or false.
+ */
 typedef unsigned char bool;
+/**
+ * A comparison type used for comparisons between values, such as strings or integers.
+ * It can represent various comparison results including larger, smaller, equal, and undefined.
+ * 
+ * Comparison operators can be used to compare two compare_t values, and it follows that infinitely larger is greater than larger,
+ * which is greater than equal, which is greater than smaller, which is greater than infinitely smaller. All values are greater than undefined.
+ * 
+ * When checking for comparison results for the simple purpose of equality, it is possible to do '== equal'.
+ * When checking for inequality, it is possible to do '!= equal'.
+ * When checking for greater-than relationships, it is possible to do '> equal' to check for both larger and infinitely larger.
+ * For simplicity, you may also use the is_larger() function to check for both larger and infinitely larger.
+ * However, when checking for less-than relationships, in addition to '< larger', it is also necessary to check for != undefined to ensure the comparison is defined,
+ * unless the context guarantees that the comparison is defined. For simplicity, you may also use the is_smaller() function to check for both smaller
+ * and infinitely smaller while ensuring the comparison is defined.
+ */
+typedef char compare_t;
+// Comment on why not use enum: enums are a bit wasteful and cannot achieve the fact to let undefined be less than all other values easily.
+/**
+ * False boolean value, evaluates to 0.
+ */
 extern const bool false;
+/**
+ * True boolean value, evaluates to 1.
+ */
 extern const bool true;
+/**
+ * Comparison result indicating the first value is infinitely larger than the second, which indicates that either
+ * the first value is infinity or the second value is negative infinity.
+ */
+extern const compare_t inf_larger;
+/**
+ * Comparison result indicating the first value is larger than the second. This evaluates to 1.
+ */
+extern const compare_t larger;
+/**
+ * Comparison result indicating the first value is smaller than the second. This evaluates to -1.
+ */
+extern const compare_t smaller;
+/**
+ * Comparison result indicating the first value is infinitely smaller than the second, which indicates that either
+ * the first value is negative infinity or the second value is infinity.
+ */
+extern const compare_t inf_smaller;
+/**
+ * Comparison result indicating the two values are equal. This evaluates to 0.
+ */
+extern const compare_t equal;
+/**
+ * Comparison result indicating the comparison is undefined, such as when comparing NaN values or for relationships that are not clearly defined.
+ */
+extern const compare_t undefined;
+
+/**
+ * Checks if the comparison result indicates that the first value is larger than the second.
+ * This includes both 'larger' and 'infinitely larger' results.
+ * @param cmp The comparison result to check.
+ * @return true if the first value is larger, false otherwise.
+ */
+bool is_larger(const compare_t cmp);
+/**
+ * Checks if the comparison result indicates that the first value is smaller than the second.
+ * This includes both 'smaller' and 'infinitely smaller' results.
+ * @param cmp The comparison result to check.
+ * @return true if the first value is smaller, false otherwise.
+ */
+bool is_smaller(const compare_t cmp);
 
 /**
  * A simple buffer structure to hold data, its size, and capacity.
@@ -49,6 +124,28 @@ typedef struct {
     size_t capacity;
 } _cp_Buffer;
 
+/**
+ * Creates a buffer from a null-terminated C string without copying the data.
+ * The buffer's data pointer points directly to the original string.
+ * The size and capacity of the buffer are set to the length of the string.
+ * 
+ * Unlike all the functions that create buffers, this macro does not perform any memory allocation,
+ * so there is no need to free the buffer created by this macro.
+ * However, the original string must remain valid for the lifetime of the buffer.
+ * 
+ * IMPORTANT: Since this macro does not perform memory allocation, the resulting buffer should not be freed.
+ * Freeing such a buffer would lead to undefined behavior. Since most functions in this package can dymanically
+ * allocate, reallocate, or free buffers, you may only pass the result of this macros to functions that
+ * explicitly protect it with const qualifier and does not attempt to free or reallocate the buffer.
+ * @param str The C string to use.
+ * @return A new buffer referencing the string data, or NULL if str is NULL.
+ */
+#define _cp_buffer_from_cstr_const(strptr) \
+    (&(_cp_Buffer){ \
+        .data = (byte*)(strptr), \
+        .size = strlen(strptr), \
+        .capacity = strlen(strptr) + 1 \
+    })
 /**
  * Initializes the buffer pool.
  * This function allocates memory for a pool of reusable buffers.
@@ -174,5 +271,15 @@ _cp_Buffer* _cp_buffer_concat(const _cp_Buffer* buf1, const _cp_Buffer* buf2);
  * @param src The source buffer to append from.
  */
 void _cp_buffer_concat_inplace(_cp_Buffer* dest, const _cp_Buffer* src);
+/**
+ * Compares two buffers lexicographically from specified offsets for a given length.
+ * @param buf1 The first buffer.
+ * @param buf2 The second buffer.
+ * @param offset1 The starting offset in the first buffer.
+ * @param offset2 The starting offset in the second buffer.
+ * @param length The number of bytes to compare
+ * @return A compare_t value indicating the comparison result.
+ */
+compare_t _cp_buffer_bufcomp(const _cp_Buffer* buf1, const _cp_Buffer* buf2, size_t offset1, size_t offset2, size_t length);
 
 #endif // _CP_SYS_H
