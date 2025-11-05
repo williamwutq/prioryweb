@@ -265,6 +265,25 @@ _cp_Buffer* _cp_buffer_from_cstr_inplace(const char* str);
  */
 _cp_Buffer* _cp_buffer_concat(const _cp_Buffer* buf1, const _cp_Buffer* buf2);
 /**
+ * Prints the contents of the buffer to stdout.
+ * If the buffer is NULL, prints nothing.
+ * @param buf The buffer to print.
+ */
+void _cp_buffer_print(const _cp_Buffer* buf);
+/**
+ * Prints detailed information about the buffer to stdout, including size, capacity, and hex representation of data.
+ * If the buffer is NULL, indicates that the buffer is NULL.
+ * @param buf The buffer to print details of.
+ */
+void _cp_buffer_print_detail(const _cp_Buffer* buf);
+/**
+ * Prints the binary representation of the buffer's data to stdout.
+ * If the buffer is NULL, prints nothing.
+ * @param buf The buffer to print in binary.
+ * @param divide_each Number of bits after which to insert a space for readability. If 0, no spaces are added.
+ */
+void _cp_buffer_print_binary(const _cp_Buffer* buf, const unsigned char divide_each);
+/**
  * Concatenates src buffer into dest buffer in place.
  * No new buffer is created. The dest buffer is expanded if necessary.
  * @param dest The destination buffer to append to.

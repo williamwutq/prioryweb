@@ -276,6 +276,43 @@ void _cp_buffer_concat_inplace(_cp_Buffer* dest, const _cp_Buffer* src) {
     dest->size += src->size;
 }
 
+void _cp_buffer_print(const _cp_Buffer* buf) {
+    if (buf == NULL) {
+        return;
+    }
+    for (size_t i = 0; i < buf->size; i++) {
+        putchar(buf->data[i]);
+    }
+    putchar('\n');
+}
+
+void _cp_buffer_print_detail(const _cp_Buffer* buf) {
+    if (buf == NULL) {
+        printf("Buffer is NULL\n");
+        return;
+    }
+    printf("Buffer size: %zu, capacity: %zu\n", buf->size, buf->capacity);
+    printf("Buffer data (hex): ");
+    for (size_t i = 0; i < buf->size; i++) {
+        printf("%02X ", buf->data[i]);
+    }
+    printf("\n");
+}
+
+void _cp_buffer_print_binary(const _cp_Buffer* buf, const unsigned char divide_each) {
+    if (buf == NULL) {
+        return;
+    }
+    int c = 0;
+    for (size_t i = 0; i < buf->size+1; i++) {
+        for (int bit = 7; bit >= 0; bit--) {
+            putchar((buf->data[i] & (1 << bit)) ? '1' : '0'); c++;
+            if (divide_each > 0 && c % divide_each == 0) { putchar(' ');  }
+        }
+    }
+    putchar('\n');
+}
+
 compare_t _cp_buffer_bufcomp(const _cp_Buffer* buf1, const _cp_Buffer* buf2, size_t offset1, size_t offset2, size_t length) {
     if (buf1 == NULL || buf2 == NULL) return undefined;
     if (offset1 >= buf1->size || offset2 >= buf2->size) return undefined;
