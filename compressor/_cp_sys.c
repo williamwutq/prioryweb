@@ -7,6 +7,8 @@ typedef unsigned char byte;
 const uint16_t BLOCK_SIZE = 256;
 const uint16_t DEFAULT_SIZE = 256 * 16;
 const int DEBUG = 1;// Set to 1 to enable debug messages
+const bool false = 0;
+const bool true = 1;
 
 // System
 void _cp_init(){
@@ -130,7 +132,7 @@ void _cp_buffer_clear(_cp_Buffer* buf) {
     buf->size = 0;
 }
 
-_cp_Buffer* _cp_buffer_expand(_cp_Buffer* buf, size_t min_size) {
+_cp_Buffer* _cp_buffer_expand(_cp_Buffer* buf, const size_t min_size) {
     if (buf->size + min_size > buf->capacity) {
         size_t new_capacity = buf->capacity * 2;
         while (buf->size + min_size > new_capacity) {
@@ -157,7 +159,7 @@ _cp_Buffer* _cp_buffer_double(_cp_Buffer* buf) {
     return buf;
 }
 
-_cp_Buffer* _cp_buffer_copy(_cp_Buffer* src) {
+_cp_Buffer* _cp_buffer_copy(const _cp_Buffer* src) {
     _cp_Buffer* dest = _cp_buffer_create();
     if (dest == NULL) {
         return NULL; // Allocation failed
@@ -171,14 +173,29 @@ _cp_Buffer* _cp_buffer_copy(_cp_Buffer* src) {
     return dest;
 }
 
-size_t _cp_buffer_remaining_capacity(_cp_Buffer* buf) {
+size_t _cp_buffer_remaining_capacity(const _cp_Buffer* buf) {
     if (buf == NULL) return 0;
     return buf->capacity - buf->size;
 }
 
-char _cp_buffer_char_at(_cp_Buffer* buf, size_t index) {
+char _cp_buffer_char_at(const _cp_Buffer* buf, const size_t index) {
     if (buf == NULL || index >= buf->size) return '\0';
     return (char)buf->data[index];
+}
+
+void _cp_buffer_set_char_at(const _cp_Buffer* buf, const size_t index, const char c) {
+    if (buf == NULL || index >= buf->size) return;
+    buf->data[index] = (byte)c;
+}
+
+void _cp_buffer_append_char(_cp_Buffer* buf, const char c) {
+    if (buf == NULL) return;
+    if (buf->size + 1 > buf->capacity) {
+        if (_cp_buffer_expand(buf, 1) == NULL) {
+            return; // Allocation failed
+        }
+    }
+    buf->data[buf->size++] = (byte)c;
 }
 
 char* _cp_buffer_cstr(_cp_Buffer* buf) {
@@ -222,7 +239,7 @@ _cp_Buffer* _cp_buffer_from_cstr_inplace(const char* str) {
     return buf;
 }
 
-_cp_Buffer* _cp_buffer_concat(_cp_Buffer* buf1, _cp_Buffer* buf2) {
+_cp_Buffer* _cp_buffer_concat(const _cp_Buffer* buf1, const _cp_Buffer* buf2) {
     if (buf1 == NULL || buf2 == NULL) return NULL;
     _cp_Buffer* bufn = _cp_buffer_create();
     if (bufn == NULL) return NULL;
@@ -237,7 +254,7 @@ _cp_Buffer* _cp_buffer_concat(_cp_Buffer* buf1, _cp_Buffer* buf2) {
     return bufn;
 }
 
-void _cp_buffer_concat_inplace(_cp_Buffer* dest, _cp_Buffer* src) {
+void _cp_buffer_concat_inplace(_cp_Buffer* dest, const _cp_Buffer* src) {
     if (dest == NULL || src == NULL) return;
     if (_cp_buffer_expand(dest, src->size) == NULL) {
         return; // Allocation failed

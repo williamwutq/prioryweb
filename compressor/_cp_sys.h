@@ -36,6 +36,9 @@ void _cp_debug(const char* msg);
 void _cp_finish(void);
 
 typedef unsigned char byte;
+typedef unsigned char bool;
+extern const bool false;
+extern const bool true;
 
 /**
  * A simple buffer structure to hold data, its size, and capacity.
@@ -92,7 +95,7 @@ void _cp_buffer_clear(_cp_Buffer* buf);
  * @param min_size The minimum additional size required.
  * @return The expanded buffer, or NULL on allocation failure.
  */
-_cp_Buffer* _cp_buffer_expand(_cp_Buffer* buf, size_t min_size);
+_cp_Buffer* _cp_buffer_expand(_cp_Buffer* buf, const size_t min_size);
 /**
  * Doubles the capacity of the buffer.
  * @param buf The buffer to double.
@@ -104,20 +107,34 @@ _cp_Buffer* _cp_buffer_double(_cp_Buffer* buf);
  * @param src The source buffer to copy.
  * @return A new buffer that is a copy of the source, or NULL on allocation failure.
  */
-_cp_Buffer* _cp_buffer_copy(_cp_Buffer* src);
+_cp_Buffer* _cp_buffer_copy(const _cp_Buffer* src);
 /**
  * Returns the remaining capacity of the buffer.
  * @param buf The buffer to check.
  * @return The remaining capacity in bytes.
  */
-size_t _cp_buffer_remaining_capacity(_cp_Buffer* buf);
+size_t _cp_buffer_remaining_capacity(const _cp_Buffer* buf);
 /**
  * Returns the character at the specified index in the buffer.
  * @param buf The buffer to read from.
  * @param index The index of the character to retrieve.
  * @return The character at the specified index, or '\0' if out of bounds.
  */
-char _cp_buffer_char_at(_cp_Buffer* buf, size_t index);
+char _cp_buffer_char_at(const _cp_Buffer* buf, const size_t index);
+/**
+ * Sets the character at the specified index in the buffer.
+ * @param buf The buffer to modify.
+ * @param index The index of the character to set.
+ * @param c The character to set at the specified index.
+ */
+void _cp_buffer_set_char_at(const _cp_Buffer* buf, const size_t index, const char c);
+/**
+ * Appends a character to the end of the buffer.
+ * Expands the buffer if necessary.
+ * @param buf The buffer to append to.
+ * @param c The character to append.
+ */
+void _cp_buffer_append_char(_cp_Buffer* buf, const char c);
 /**
  * Converts the buffer data to a null-terminated C string.
  * Note: The buffer must have enough capacity to add the null terminator.
@@ -149,13 +166,13 @@ _cp_Buffer* _cp_buffer_from_cstr_inplace(const char* str);
  * @param buf2 The second buffer.
  * @return A new buffer containing the concatenated data, or NULL on allocation failure.
  */
-_cp_Buffer* _cp_buffer_concat(_cp_Buffer* buf1, _cp_Buffer* buf2);
+_cp_Buffer* _cp_buffer_concat(const _cp_Buffer* buf1, const _cp_Buffer* buf2);
 /**
  * Concatenates src buffer into dest buffer in place.
  * No new buffer is created. The dest buffer is expanded if necessary.
  * @param dest The destination buffer to append to.
  * @param src The source buffer to append from.
  */
-void _cp_buffer_concat_inplace(_cp_Buffer* dest, _cp_Buffer* src);
+void _cp_buffer_concat_inplace(_cp_Buffer* dest, const _cp_Buffer* src);
 
 #endif // _CP_SYS_H
