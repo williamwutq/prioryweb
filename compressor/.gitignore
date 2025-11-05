@@ -1,0 +1,13 @@
+# C #
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
+*.a
+*.lib
+*.lo
+*.gch
+*.pch
