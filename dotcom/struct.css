@@ -1,0 +1,251 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header, footer {
+    padding: 10px 0;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    min-height: 30px;
+    display: flex;
+    flex-direction: row;
+}
+
+.capsule, .shadowed-capsule {
+    display: block;
+    position: fixed;
+    border-radius: 50vmin;
+    border: none;
+}
+
+.bordered-capsule {
+    display: block;
+    position: fixed;
+    border-radius: 50vmin;
+    border: 2px solid;
+}
+
+.disable-selection, :placeholder-shown {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.disable-decoration {
+    text-decoration: none !important;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.horizontal-spacer {
+    display: flex;
+    height: 100%;
+    flex-grow: 1;
+}
+
+.vertical-spacer {
+    display: flex;
+    width: 100%;
+    flex-grow: 1;
+}
+
+.horitontal-line {
+    display: flex;
+    width: 100%;
+    height: 0;
+    flex-grow: 1;
+    flex-shrink: 0;
+    border-bottom: 1.5px solid;
+}
+
+.vertical-line {
+    display: flex;
+    height: 100%;
+    width: 0;
+    flex-grow: 1;
+    flex-shrink: 0;
+    border-right: 1.5px solid;
+}
+
+.magnify-text {
+    font-size: 1.2em;
+}
+
+.large-text {
+    font-size: 1.5em;
+}
+
+.super-large-text {
+    font-size: 3em;
+}
+
+.wrapper-inherit {
+    width: inherit;
+    display: inherit;
+    justify-content: inherit;
+    align-items: inherit;
+    flex-direction: inherit;
+    gap: inherit;
+}
+
+.button-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+button, .button {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.header-button {
+    border-radius: 20px;
+    width: auto;
+    height: auto;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    border: 4px double;
+}
+
+.normal-button {
+    border-radius: 10px;
+    width: auto;
+    height: auto;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding-left: 5px;
+    padding-right: 5px;
+    border: 2px solid;
+}
+
+.normal-button:hover {
+    cursor: pointer;
+    border: 2px solid;
+}
+
+.title-bar {
+    text-align: left;
+    align-items: baseline;
+    display: flex;
+    gap: 2px;
+    flex-direction: row;
+}
+
+.inline-text {
+    vertical-align: super;
+}
+
+.center-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    padding-top: auto;
+    padding-bottom: auto;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.search-box {
+    width: 50%;
+    min-width: 300px;
+    max-width: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    height: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.search-button {
+    border-radius: 15px;
+    width: auto;
+    height: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: none;
+    background-color: var(--color-medium);
+    color: var(--light);
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-button:hover {
+    background-color: var(--color-dark);
+}
+
+.search-input {
+    height: 30px;
+    flex-grow: 1;
+    border: none;
+    border-radius: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    font-size: 1em;
+    background-color: transparent;
+    color: inherit;
+}
+
+.search-input:focus, input:-webkit-autofill, input:-webkit-autofill:focus, input:-webkit-autofill:hover, input:-webkit-autofill:focus-visible
+{
+    background-color: transparent !important;
+    outline: none;
+}
+
+.capsule-bottom-right {
+    bottom: 12px; 
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    flex-direction: row;
+    background-color: var(--accent-light);
+}
+
+.capsule-bottom-right .vertical-line {
+    height: 28px;
+}
+
+.capsule-bottom-right a {
+    min-width: 50px;
+    text-align: center;
+}
