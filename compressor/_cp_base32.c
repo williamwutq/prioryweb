@@ -12,10 +12,13 @@
 #ifndef _STRING_H_
 #include <string.h>
 #endif // _STRING_H_
+#ifndef _STDIO_H_
+#include <stdio.h>
+#endif // _STDIO_H_
 
 // Encoding functions
 
-void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, const size_t index, const char c) {
+void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, size_t* index, const char c) {
     switch (c){
         case '\0':
             _cp_base32_write_5_bits(buf, offset, index, 0);
@@ -87,82 +90,82 @@ void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, const size_t i
             _cp_base32_write_5_bits(buf, offset, index, 14);
             break;
         case '.':
-            _cp_base32_write_5_bits(buf, offset, index, 2);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'k':
             _cp_base32_write_5_bits(buf, offset, index, 15);
             break;
         case ',':
-            _cp_base32_write_5_bits(buf, offset, index, 2);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'l':
             _cp_base32_write_5_bits(buf, offset, index, 16);
             break;
         case '-':
-            _cp_base32_write_5_bits(buf, offset, index, 2);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'm':
             _cp_base32_write_5_bits(buf, offset, index, 17);
             break;
         case '_':
-            _cp_base32_write_5_bits(buf, offset, index, 2);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'n':
             _cp_base32_write_5_bits(buf, offset, index, 18);
             break;
         case '/':
-            _cp_base32_write_5_bits(buf, offset, index, 2);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'o':
             _cp_base32_write_5_bits(buf, offset, index, 19);
             break;
         case ':':
-            _cp_base32_write_5_bits(buf, offset, index, 3);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'p':
             _cp_base32_write_5_bits(buf, offset, index, 20);
             break;
         case ';':
-            _cp_base32_write_5_bits(buf, offset, index, 3);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'q':
             _cp_base32_write_5_bits(buf, offset, index, 21);
             break;
         case '?':
-            _cp_base32_write_5_bits(buf, offset, index, 3);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'r':
             _cp_base32_write_5_bits(buf, offset, index, 22);
             break;
         case '!':
-            _cp_base32_write_5_bits(buf, offset, index, 3);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 's':
             _cp_base32_write_5_bits(buf, offset, index, 23);
             break;
         case '@':
-            _cp_base32_write_5_bits(buf, offset, index, 3);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 't':
             _cp_base32_write_5_bits(buf, offset, index, 24);
             break;
         case '#':
-            _cp_base32_write_5_bits(buf, offset, index, 3);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'u':
             _cp_base32_write_5_bits(buf, offset, index, 25);
             break;
         case '$':
-            _cp_base32_write_5_bits(buf, offset, index, 3);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'v':
             _cp_base32_write_5_bits(buf, offset, index, 26);
             break;
         case '+':
-            _cp_base32_write_5_bits(buf, offset, index, 4);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'w':
             _cp_base32_write_5_bits(buf, offset, index, 27);
             break;
         case '=':
-            _cp_base32_write_5_bits(buf, offset, index, 4);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'x':
             _cp_base32_write_5_bits(buf, offset, index, 28);
             break;
         case '*':
-            _cp_base32_write_5_bits(buf, offset, index, 4);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'y':
             _cp_base32_write_5_bits(buf, offset, index, 29);
             break;
         case '&':
-            _cp_base32_write_5_bits(buf, offset, index, 4);
+            _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'z':
             _cp_base32_write_5_bits(buf, offset, index, 30);
             break;
@@ -173,58 +176,61 @@ void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, const size_t i
     }
 }
 
-void _cp_base32_encode_terminator(_cp_Buffer* buf, const size_t offset, const size_t index) {
+void _cp_base32_encode_terminator(_cp_Buffer* buf, const size_t offset, size_t* index) {
     _cp_base32_write_5_bits(buf, offset, index, 0);
 }
 
-void _cp_base32_encode_starter(_cp_Buffer* buf, const size_t offset, const size_t index) {
+void _cp_base32_encode_starter(_cp_Buffer* buf, const size_t offset, size_t* index) {
     _cp_base32_write_5_bits(buf, offset, index, 1);
     _cp_base32_write_5_bits(buf, offset, index, 0);
 }
 
-void _cp_base32_encode_nbsp(_cp_Buffer* buf, const size_t offset, const size_t index) {
+void _cp_base32_encode_nbsp(_cp_Buffer* buf, const size_t offset, size_t* index) {
     _cp_base32_write_5_bits(buf, offset, index, 1);
     _cp_base32_write_5_bits(buf, offset, index, 3);
 }
 
-void _cp_base32_encode_endl(_cp_Buffer* buf, const size_t offset, const size_t index) {
+void _cp_base32_encode_endl(_cp_Buffer* buf, const size_t offset, size_t* index) {
     _cp_base32_write_5_bits(buf, offset, index, 3);
 }
 
-void _cp_base32_write_5_bits(_cp_Buffer* buf, const size_t offset, const size_t index, byte value) {
+void _cp_base32_write_5_bits(_cp_Buffer* buf, const size_t offset, size_t* index, byte value) {
     if (buf == NULL) return;
     if (value >= 32) value %= 32; // Ensure value is within 5 bits
 
-    size_t bit_pos = index * 5;
+    size_t bit_pos = *index * 5;
     size_t byte_pos = bit_pos / 8 + offset;
     size_t bit_offset = bit_pos % 8;
 
-    // Number of bits going into current byte
-    size_t bits_in_current = 8 - bit_offset;
-    if (bits_in_current > 5) bits_in_current = 5;
-
-    size_t bits_in_next = 5 - bits_in_current;
-
-    // Determine required size
-    size_t required = byte_pos + 1;
-    if (bits_in_next > 0) required++;
-
-    // Expand buffer if needed
+    // Ensure enough space: we may need up to 2 bytes (5 bits can cross byte boundary)
+    size_t required = byte_pos + 2;
     if (required > buf->capacity) {
         buf = _cp_buffer_expand(buf, required - buf->capacity);
+        if (buf == NULL) return; // Expansion failed
     }
 
-    // Clear and write current byte part
-    byte current_mask = (1 << bits_in_current) - 1;
-    buf->data[byte_pos] &= ~(current_mask << bit_offset);
-    buf->data[byte_pos] |= ((value << (5 - bits_in_current)) & 0x1F) << bit_offset;
+    // Clear the 5-bit target area across 1 or 2 bytes
+    // We'll write bit-by-bit to avoid assumptions about endianness or alignment
 
-    // Write overflow into next byte if any
-    if (bits_in_next > 0) {
-        byte next_mask = (1 << bits_in_next) - 1;
-        buf->data[byte_pos + 1] &= ~next_mask;
-        buf->data[byte_pos + 1] |= (value >> bits_in_current) & next_mask;
+    for (int i = 0; i < 5; ++i) {
+        size_t current_bit = bit_pos + i;
+        size_t target_byte = current_bit / 8 + offset;
+        size_t target_bit  = current_bit % 8;
+        byte bit_value = (value >> (4 - i)) & 1; // MSB first
+
+        // Clear the target bit
+        buf->data[target_byte] &= ~(1 << (7 - target_bit));
+        // Set the target bit
+        buf->data[target_byte] |= (bit_value << (7 - target_bit));
     }
+
+    // Update buffer size if needed
+    if (required > buf->size) {
+        buf->size = required;
+    }
+
+    // Advance index for next 5-bit write
+    (*index)++;
 }
 
 void _cp_base32_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offset) {
@@ -239,33 +245,33 @@ void _cp_base32_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offs
     }
 
     size_t index = 0;
-    _cp_base32_encode_starter(buf, offset, index++);
+    _cp_base32_encode_starter(buf, offset, &index);
     for (size_t i = 0; _cp_buffer_char_at(str, i) != '\0' && i < str_len; i++) {
         char c = _cp_buffer_char_at(str, i);
         char n = _cp_buffer_char_at(str, i + 1);
         // Case: \n\r or \r\n
         if ((c == '\n' && n == '\r') || (c == '\r' && n == '\n')) {
-            _cp_base32_encode_endl(buf, offset, index++);
+            _cp_base32_encode_endl(buf, offset, &index);
             i++; // Skip next character
             continue;
         }
         // Case: non-breaking space (U+00A0)
         if ((unsigned char)c == 0xC2 && (unsigned char)n == 0xA0) {
-            _cp_base32_encode_nbsp(buf, offset, index++);
+            _cp_base32_encode_nbsp(buf, offset, &index);
             i++; // Skip next byte
             continue;
         }
         // Pattern: &nbsp; or &#160; for web representation of non-breaking space
-        if (_cp_buffer_bufcomp(str, _cp_buffer_from_cstr_const("&nbsp;"), index, 0, 6) == 0 || _cp_buffer_bufcomp(str, _cp_buffer_from_cstr_const("&#160;"), index, 0, 6) == 0) {
-            _cp_base32_encode_nbsp(buf, offset, index++);
-            i += 5; // Skip next 5 characters
+        if (_cp_buffer_bufcomp(str, _cp_buffer_from_cstr_const("&nbsp;"), i, 0, 6) == 0 || _cp_buffer_bufcomp(str, _cp_buffer_from_cstr_const("&#160;"), i, 0, 6) == 0) {
+            _cp_base32_encode_nbsp(buf, offset, &index);
+            i += 5;
             continue;
         }
         // Encode regular character
-        _cp_base32_encode_char(buf, offset, index++, c);
+        _cp_base32_encode_char(buf, offset, &index, c);
     }
     // Encode terminator
-    _cp_base32_encode_terminator(buf, offset, index++);
+    _cp_base32_encode_terminator(buf, offset, &index);
     // Make sure the byte at index is padded with zeros
     size_t bit_pos = index * 5;
     size_t byte_pos = bit_pos / 8 + offset;
@@ -280,35 +286,29 @@ void _cp_base32_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offs
 }
 
 // Decoding functions
-char _cp_base32_read_5_bits(_cp_Buffer* buf, size_t offset, size_t index) {
-    if (buf == NULL) return 0;
+char _cp_base32_read_5_bits(_cp_Buffer* buf, size_t offset, size_t index)
+{
+    if (buf == NULL || buf->data == NULL) return 0;
+    size_t bit_pos   = index * 5;
+    size_t byte_pos  = bit_pos / 8 + offset;
+    size_t bit_off   = bit_pos % 8;
 
-    size_t bit_pos = index * 5;
-    size_t byte_pos = bit_pos / 8 + offset;
-    size_t bit_offset = bit_pos % 8;
+    /* we never need more than 2 bytes for 5 bits */
+    size_t required = byte_pos + 2;
+    if (required > buf->size) return 0;
 
-    // Number of bits in current byte
-    size_t bits_in_current = 8 - bit_offset;
-    if (bits_in_current > 5) bits_in_current = 5;
+    char value = 0;
 
-    size_t bits_in_next = 5 - bits_in_current;
+    for (int i = 0; i < 5; ++i) {
+        size_t cur_bit   = bit_pos + i;
+        size_t cur_byte  = cur_bit / 8 + offset;
+        size_t cur_off   = cur_bit % 8;
+        /* read the bit (bit 7 = MSB of the byte) */
+        int bit = (buf->data[cur_byte] >> (7 - cur_off)) & 1;
 
-    byte value = 0;
-
-    // Protection against out-of-bounds
-    if (byte_pos >= buf->capacity) return 0;
-
-    // Read current byte part
-    byte current_mask = (1 << bits_in_current) - 1;
-    value |= (buf->data[byte_pos] >> bit_offset) & current_mask;
-
-    // Read overflow from next byte if any
-    if (bits_in_next > 0) {
-        byte next_mask = (1 << bits_in_next) - 1;
-        value |= (buf->data[byte_pos + 1] & next_mask) << bits_in_current;
+        value = (value << 1) | bit;
     }
-
-    return value & 0x1F; // Return only 5 bits
+    return value;
 }
 
 bool _cp_base32_decode_nonescape(_cp_Buffer* buf, size_t offset, size_t index, _cp_Buffer* out) {

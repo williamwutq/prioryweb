@@ -16,7 +16,7 @@
  * @param index The index of the 5-bit value to write.
  * @param c The character to encode.
  */
-void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, const size_t index, const char c);
+void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, size_t* index, const char c);
 
 /**
  * Encodes terminator character, which is the null character.
@@ -24,7 +24,7 @@ void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, const size_t i
  * @param offset The byte offset in the buffer.
  * @param index The index of the 5-bit value to write.
  */
-void _cp_base32_encode_terminator(_cp_Buffer* buf, const size_t offset, const size_t index);
+void _cp_base32_encode_terminator(_cp_Buffer* buf, const size_t offset, size_t* index);
 
 /**
  * Encodes start of sequence character.
@@ -32,7 +32,7 @@ void _cp_base32_encode_terminator(_cp_Buffer* buf, const size_t offset, const si
  * @param offset The byte offset in the buffer.
  * @param index The index of the 5-bit value to write.
  */
-void _cp_base32_encode_starter(_cp_Buffer* buf, const size_t offset, const size_t index);
+void _cp_base32_encode_starter(_cp_Buffer* buf, const size_t offset, size_t* index);
 
 /**
  * Encodes a non-breaking space character.
@@ -40,7 +40,7 @@ void _cp_base32_encode_starter(_cp_Buffer* buf, const size_t offset, const size_
  * @param offset The byte offset in the buffer.
  * @param index The index of the 5-bit value to write.
  */
-void _cp_base32_encode_nbsp(_cp_Buffer* buf, const size_t offset, const size_t index);
+void _cp_base32_encode_nbsp(_cp_Buffer* buf, const size_t offset, size_t* index);
 
 /**
  * Encodes an end-of-line character.
@@ -48,7 +48,7 @@ void _cp_base32_encode_nbsp(_cp_Buffer* buf, const size_t offset, const size_t i
  * @param offset The byte offset in the buffer.
  * @param index The index of the 5-bit value to write.
  */
-void _cp_base32_encode_endl(_cp_Buffer* buf, const size_t offset, const size_t index);
+void _cp_base32_encode_endl(_cp_Buffer* buf, const size_t offset, size_t* index);
 
 /**
  * Writes 5 bits of value into the buffer at the specified index.
@@ -57,7 +57,7 @@ void _cp_base32_encode_endl(_cp_Buffer* buf, const size_t offset, const size_t i
  * @param index The index of the 5-bit value to write.
  * @param value The 5-bit value to write (0-31).
  */
-void _cp_base32_write_5_bits(_cp_Buffer* buf, const size_t offset, const size_t index, byte value);
+void _cp_base32_write_5_bits(_cp_Buffer* buf, const size_t offset, size_t* index, byte value);
 
 /**
  * Encodes a string into base32 format and writes to buffer.

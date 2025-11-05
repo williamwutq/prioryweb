@@ -332,7 +332,9 @@ compare_t _cp_buffer_bufcomp(const _cp_Buffer* buf1, const _cp_Buffer* buf2, siz
     }
 
     // All compared bytes equal
-    if (avail1 < avail2) return inf_smaller;
-    if (avail1 > avail2) return inf_larger;
+    if (length > minavail) {
+        if (avail1 < avail2) return inf_smaller;
+        if (avail1 > avail2) return inf_larger;
+    }
     return equal;
 }
