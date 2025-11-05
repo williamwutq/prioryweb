@@ -30,3 +30,7 @@ lerna-debug.log*
 *.cert
 key/
 cert/
+
+## VSCode ##
+.vscode/
+.history/
