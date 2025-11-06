@@ -204,6 +204,42 @@ typedef struct {
         .capacity = (bufptr)->capacity - (offset) \
     })
 /**
+ * Creates a constant window view of the buffer between the specified start and end offsets.
+ * The view shares the same data pointer as the original buffer, adjusted by the start offset.
+ * The size of the view is set to the difference between the end and start offsets.
+ * The capacity of the view is reduced by the start offset.
+ * 
+ * The function assumes that the start and end offsets are within the bounds of the original buffer
+ * and that start is less than or equal to end. If this is not the case, the behavior is undefined.
+ * 
+ * This function does not perform any memory allocation, so there is no need to free the resulting buffer view.
+ * However, the original buffer must remain valid for the lifetime of the buffer view.
+ * 
+ * It is the best practice to avoid use this macro if a few calls to _cp_buffer_char_at()
+ * or direct manipulation of the original buffer with offset calculations would suffice. This is because
+ * although this macro may improve performance and code readability in certain scenarios,
+ * it also increases the risk of creating dangling buffer views if the original buffer is modified or freed.
+ * 
+ * IMPORTANT: Since this macro does not perform memory allocation, the resulting buffer should not be freed.
+ * Freeing such a buffer would lead to undefined behavior. Since most functions in this package can dymanically
+ * allocate, reallocate, or free buffers, you may only pass the result of this macros to functions that
+ * explicitly protect it with const qualifier and does not attempt to free or reallocate the buffer.
+ * 
+ * IMPORTANT: DO NOT store the result of this macro into a non-const _cp_Buffer pointer, as this object is compiled
+ * statically on the stack and is not intended to be modified. For best practice, do not store the result of this macro
+ * into any variable at all, just use it directly as a parameter to functions that accept const _cp_Buffer*.
+ * @param bufptr Pointer to the original buffer.
+ * @param start The starting offset of the window.
+ * @param end The ending offset of the window.
+ * @return A new constant window buffer view between the specified offsets.
+ */
+#define _cp_buffer_window_consts(bufptr, start, end) \
+    (&(_cp_Buffer){ \
+        .data = (byte*)((bufptr)->data + (start)), \
+        .size = (end) - (start), \
+        .capacity = (bufptr)->capacity - (start) \
+    })
+/**
  * Creates a constant trimmed view of the buffer with the specified new size.
  * The view shares the same data pointer as the original buffer.
  * The size of the view is set to the new size, while the capacity remains unchanged.
@@ -292,6 +328,14 @@ _cp_Buffer* _cp_buffer_double(_cp_Buffer* buf);
  * @return A new buffer that is a copy of the source, or NULL on allocation failure.
  */
 _cp_Buffer* _cp_buffer_copy(const _cp_Buffer* src);
+/**
+ * Creates a copy of a range within the given buffer.
+ * @param src The source buffer to copy from.
+ * @param start The starting index of the range (inclusive).
+ * @param end The ending index of the range (exclusive).
+ * @return A new buffer containing the specified range, or NULL on allocation failure.
+ */
+_cp_Buffer* _cp_buffer_copy_range(const _cp_Buffer* src, const size_t start, const size_t end);
 /**
  * Returns the remaining capacity of the buffer.
  * @param buf The buffer to check.

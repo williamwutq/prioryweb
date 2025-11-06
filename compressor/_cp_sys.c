@@ -186,6 +186,24 @@ _cp_Buffer* _cp_buffer_copy(const _cp_Buffer* src) {
     return dest;
 }
 
+_cp_Buffer* _cp_buffer_copy_range(const _cp_Buffer* src, const size_t start, const size_t end) {
+    if (start >= end || end > src->size) {
+        return NULL; // Invalid range
+    }
+    _cp_Buffer* dest = _cp_buffer_create();
+    if (dest == NULL) {
+        return NULL; // Allocation failed
+    }
+    size_t range_size = end - start;
+    if (_cp_buffer_expand(dest, range_size) == NULL) {
+        _cp_buffer_free(dest);
+        return NULL; // Allocation failed
+    }
+    memcpy(dest->data, src->data + start, range_size);
+    dest->size = range_size;
+    return dest;
+}
+
 size_t _cp_buffer_remaining_capacity(const _cp_Buffer* buf) {
     if (buf == NULL) return 0;
     return buf->capacity - buf->size;
