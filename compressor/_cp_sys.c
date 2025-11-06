@@ -117,6 +117,21 @@ _cp_Buffer* _cp_buffer_create() {
     }
 }
 
+_cp_Buffer* _cp_buffer_create_cap(size_t capacity) {
+    _cp_Buffer* buf = (_cp_Buffer*)malloc(sizeof(_cp_Buffer));
+    if (buf == NULL) {
+        return NULL; // Allocation failed
+    }
+    buf->data = (byte*)malloc(capacity);
+    if (buf->data == NULL) {
+        free(buf);
+        return NULL; // Allocation failed
+    }
+    buf->size = 0;
+    buf->capacity = capacity;
+    return buf;
+}
+
 void _cp_buffer_free(_cp_Buffer* buf) {
     if (buf == NULL) return;
     if (buf->capacity == DEFAULT_SIZE) {

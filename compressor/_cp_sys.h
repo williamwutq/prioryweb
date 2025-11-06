@@ -296,6 +296,15 @@ _cp_Buffer* _cp_pop_buffer_from_pool(void);
  */
 _cp_Buffer* _cp_buffer_create(void);
 /**
+ * Creates a new buffer with the specified capacity.
+ * It will not attempt to retrieve from the pool.
+ * You still can free the buffer with _cp_buffer_free() and it will put it back to the pool if its capacity is more or equal to DEFAULT_SIZE.
+ * For normal usage, prefer _cp_buffer_create() instead.
+ * @param capacity The desired capacity of the buffer.
+ * @return A pointer to the newly created buffer.
+ */
+_cp_Buffer* _cp_buffer_create_cap(size_t capacity);
+/**
  * Frees the buffer. If the buffer's capacity is equal to DEFAULT_SIZE,
  * it is returned to the pool for reuse. If larger, it is shrunk to
  * DEFAULT_SIZE before being returned to the pool. If smaller, it is
