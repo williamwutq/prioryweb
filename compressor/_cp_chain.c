@@ -123,7 +123,7 @@ _cp_Buffer* _cp_buffer_chain_popf(_cp_Buffer_Chain* chain) {
     return buffer;
 }
 
-void _cp_buffer_chain_iter(const _cp_Buffer_Chain* chain, const void (*func)(const _cp_Buffer*, void* data), void* data) {
+void _cp_buffer_chain_iter(const _cp_Buffer_Chain* chain, const void (*func)(const _cp_Buffer* buffer, void* data), void* data) {
     if (chain == NULL || func == NULL) {
         return;
     }
@@ -132,4 +132,27 @@ void _cp_buffer_chain_iter(const _cp_Buffer_Chain* chain, const void (*func)(con
         func(current->buffer, data);
         current = current->next;
     }
+}
+
+_cp_Buffer* _cp_buffer_chain_concat(_cp_Buffer_Chain* c1, _cp_Buffer_Chain* c2) {
+    if (c1 == NULL || c2 == NULL) {
+        _cp_die("Cannot concatenate null buffer chains.");
+    }
+    _cp_Buffer_Chain* combined_chain = _cp_buffer_chain_create();
+    _cp_Buffer_ChainNode* h1 = c1->head;
+    _cp_Buffer_ChainNode* h2 = c2->head;
+    _cp_Buffer_ChainNode* t1 = c1->tail;
+    _cp_Buffer_ChainNode* t2 = c2->tail;
+    size_t total_size = c1->total_size + c2->total_size;
+    // Free the original chains without freeing their buffers
+    free(c1);
+    free(c2);
+    combined_chain->head = h1;
+    combined_chain->tail = t2;
+    combined_chain->total_size = total_size;
+    if (t1 != NULL && h2 != NULL) {
+        t1->next = h2;
+        h2->prev = t1;
+    }
+    return combined_chain;
 }
