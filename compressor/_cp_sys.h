@@ -147,6 +147,93 @@ typedef struct {
         .capacity = strlen(strptr) + 1 \
     })
 /**
+ * Creates a buffer from raw data without copying the data.
+ * The buffer's data pointer points directly to the provided data.
+ * The size and capacity of the buffer are set to the provided data size.
+ * The function assumes the correctness of the datasize, be aware of buffer overflows.
+ * 
+ * Unlike all the functions that create buffers, this macro does not perform any memory allocation,
+ * so there is no need to free the buffer created by this macro.
+ * However, the original data must remain valid for the lifetime of the buffer.
+ * 
+ * IMPORTANT: Since this macro does not perform memory allocation, the resulting buffer should not be freed.
+ * Freeing such a buffer would lead to undefined behavior. Since most functions in this package can dymanically
+ * allocate, reallocate, or free buffers, you may only pass the result of this macros to functions that
+ * explicitly protect it with const qualifier and does not attempt to free or reallocate the buffer.
+ * 
+ * IMPORTANT: DO NOT store the result of this macro into a non-const _cp_Buffer pointer, as this object is compiled
+ * statically on the stack and is not intended to be modified. For best practice, do not store the result of this macro
+ * into any variable at all, just use it directly as a parameter to functions that accept const _cp_Buffer*.
+ * @param dataptr Pointer to the raw data.
+ * @param datasize Size of the raw data in bytes.
+ * @return A new buffer referencing the raw data, or NULL if dataptr is NULL.
+ */
+#define _cp_buffer_from_data_const(dataptr, datasize) \
+    (&(_cp_Buffer){ \
+        .data = (byte*)(dataptr), \
+        .size = (datasize), \
+        .capacity = (datasize) \
+    })
+/**
+ * Creates a constant view of the buffer starting from the specified offset.
+ * The view shares the same data pointer as the original buffer, adjusted by the offset.
+ * The size and capacity of the view are reduced by the offset.
+ * 
+ * The function assumes that the offset is within the bounds of the original buffer.
+ * If this is not the case, the behavior is undefined.
+ * 
+ * This function does not perform any memory allocation, so there is no need to free the resulting buffer view.
+ * However, the original buffer must remain valid for the lifetime of the buffer view.
+ * 
+ * IMPORTANT: Since this macro does not perform memory allocation, the resulting buffer should not be freed.
+ * Freeing such a buffer would lead to undefined behavior. Since most functions in this package can dymanically
+ * allocate, reallocate, or free buffers, you may only pass the result of this macros to functions that
+ * explicitly protect it with const qualifier and does not attempt to free or reallocate the buffer.
+ * 
+ * IMPORTANT: DO NOT store the result of this macro into a non-const _cp_Buffer pointer, as this object is compiled
+ * statically on the stack and is not intended to be modified. For best practice, do not store the result of this macro
+ * into any variable at all, just use it directly as a parameter to functions that accept const _cp_Buffer*.
+ * @param bufptr Pointer to the original buffer.
+ * @param offset The offset from which the view starts.
+ * @return A new constant buffer view starting from the specified offset.
+ */
+#define _cp_buffer_view_const(bufptr, offset) \
+    (&(_cp_Buffer){ \
+        .data = (byte*)((bufptr)->data + (offset)), \
+        .size = (bufptr)->size - (offset), \
+        .capacity = (bufptr)->capacity - (offset) \
+    })
+/**
+ * Creates a constant trimmed view of the buffer with the specified new size.
+ * The view shares the same data pointer as the original buffer.
+ * The size of the view is set to the new size, while the capacity remains unchanged.
+ * 
+ * The function assumes that the new size is less than or equal to the original buffer's size.
+ * If this is not the case, the behavior is undefined.
+ * 
+ * This function does not perform any memory allocation, so there is no need to free the resulting buffer view.
+ * However, the original buffer must remain valid for the lifetime of the buffer view.
+ * 
+ * IMPORTANT: Since this macro does not perform memory allocation, the resulting buffer should not be freed.
+ * Freeing such a buffer would lead to undefined behavior. Since most functions in this package can dymanically
+ * allocate, reallocate, or free buffers, you may only pass the result of this macros to functions that
+ * explicitly protect it with const qualifier and does not attempt to free or reallocate the buffer.
+ * 
+ * IMPORTANT: DO NOT store the result of this macro into a non-const _cp_Buffer pointer, as this object is compiled
+ * statically on the stack and is not intended to be modified. For best practice, do not store the result of this macro
+ * into any variable at all, just use it directly as a parameter to functions that accept const _cp_Buffer*.
+ * @param bufptr Pointer to the original buffer.
+ * @param newsize The new size for the trimmed view.
+ * @return A new constant trimmed buffer view with the specified size.
+ */ 
+#define _cp_buffer_trim_const(bufptr, newsize) \
+    (&(_cp_Buffer){ \
+        .data = (byte*)((bufptr)->data), \
+        .size = (newsize), \
+        .capacity = (bufptr)->capacity \
+    })
+
+/**
  * Initializes the buffer pool.
  * This function allocates memory for a pool of reusable buffers.
  */
