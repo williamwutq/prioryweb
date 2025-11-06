@@ -74,6 +74,44 @@ To efficiently encode lowercase letters (a-z) in the keyword field, we use a bas
 Behavior of Padding:
 - If the final group of data does not make a full byte, it is padded with binary zeros to make a full byte before encoding.
 
+## Base 32 Format for All Letters (Extension to the Above)
+To efficiently encode lowercase letters (a-z) in the keyword field, we use a base 32 encoding scheme. Each lowercase letter is represented using 5 bits, allowing us to pack multiple characters into fewer bytes. This version also supports all letters (a-z, A-Z) by using an escape mechanism, but ideally for upper case letters, the special base 64 encoding should be used in the compressed data section instead because this version is less efficient. The version also support xml tags by including '<' and '>' characters. The mapping is as follows:
+- 0b00000 - null (reserved, also used as terminator), or terminate and start new sequence if preceded by any escape (Never used in keywords)
+- 0b00001 - '\' (escape, for numbers and special characters), '\' if preceded by escape, or '\f' if preceded by upper case escape
+- 0b00010 - ' ' (space), '\t' (tab) if preceded by escape, '\v' if preceded by upper case escape
+- 0b00011 - '\n\r' (newline), or '&nbsp;' if preceded by escape, or '&thinsp;' if preceded by upper case escape
+- 0b00100 - '|' (separator), or starting unicode sequence if preceded by any escape (In this case, the next 5 bits indicate the length of the unicode sequence in bytes, followed by unicde data encoded in digits (a-j for 0-9).)
+- 0b00101 - 'a', or '0' if preceded by escape, or 'A' if preceded by upper case escape
+- 0b00110 - 'b', or '1' if preceded by escape, or 'B' if preceded by upper case escape
+- 0b00111 - 'c', or '2' if preceded by escape, or 'C' if preceded by upper case escape
+- 0b01000 - 'd', or '3' if preceded by escape, or 'D' if preceded by upper case escape
+- 0b01001 - 'e', or '4' if preceded by escape, or 'E' if preceded by upper case escape
+- 0b01010 - 'f', or '5' if preceded by escape, or 'F' if preceded by upper case escape
+- 0b01011 - 'g', or '6' if preceded by escape, or 'G' if preceded by upper case escape
+- 0b01100 - 'h', or '7' if preceded by escape, or 'H' if preceded by upper case escape
+- 0b01101 - 'i', or '8' if preceded by escape, or 'I' if preceded by upper case escape
+- 0b01110 - 'j', or '9' if preceded by escape, or 'J' if preceded by upper case escape
+- 0b01111 - 'k', or '.' if preceded by escape, or 'K' if preceded by upper case escape
+- 0b10000 - 'l', or ',' if preceded by escape, or 'L' if preceded by upper case escape
+- 0b10001 - 'm', or '-' if preceded by escape, or 'M' if preceded by upper case escape
+- 0b10010 - 'n', or '_' if preceded by escape, or 'N' if preceded by upper case escape
+- 0b10011 - 'o', or '/' if preceded by escape, or 'O' if preceded by upper case escape
+- 0b10100 - 'p', or ':' if preceded by escape, or 'P' if preceded by upper case escape
+- 0b10101 - 'q', or ';' if preceded by escape, or 'Q' if preceded by upper case escape
+- 0b10110 - 'r', or '?' if preceded by escape, or 'R' if preceded by upper case escape
+- 0b10111 - 's', or '!' if preceded by escape, or 'S' if preceded by upper case escape
+- 0b11000 - 't', or '@' if preceded by escape, or 'T' if preceded by upper case escape
+- 0b11001 - 'u', or '#' if preceded by escape, or 'U' if preceded by upper case escape
+- 0b11010 - 'v', or '$' if preceded by escape, or 'V' if preceded by upper case escape
+- 0b11011 - 'w', or '+' if preceded by escape, or 'W' if preceded by upper case escape
+- 0b11100 - 'x', or '=' if preceded by escape, or 'X' if preceded by upper case escape
+- 0b11101 - 'y', or '*' if preceded by escape, or 'Y' if preceded by upper case escape
+- 0b11110 - 'z', or '&' if preceded by escape, or 'Z' if preceded by upper case escape
+- 0b11111 - '->' (upper case escape, indicates the next character is upper case), or '<' if preceded by escape, '>' if preceded by upper case escape.
+
+Behavior of Padding:
+- If the final group of data does not make a full byte, it is padded with binary zeros to make a full byte before encoding.
+
 ## Base 32 Format Encoding Example
 To encode the keyword list 'data', '123', and 'hello world', which has string representation of 'data|123|hello world', we would proceed as follows:
 1. Calculate the length of the keyword string:
