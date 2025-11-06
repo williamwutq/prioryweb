@@ -11,3 +11,6 @@
 *.lo
 *.gch
 *.pch
+*.s
+*.asm
+*.ilk
