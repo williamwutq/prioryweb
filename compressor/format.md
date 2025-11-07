@@ -63,12 +63,12 @@ To efficiently encode lowercase letters (a-z) in the keyword field, we use a bas
 - 0b10110 - 'r', or '?' if preceded by escape
 - 0b10111 - 's', or '!' if preceded by escape
 - 0b11000 - 't', or '@' if preceded by escape
-- 0b11001 - 'u', or '#' if preceded by escape
+- 0b11001 - 'u', or '*' if preceded by escape
 - 0b11010 - 'v', or '$' if preceded by escape
 - 0b11011 - 'w', or '+' if preceded by escape
 - 0b11100 - 'x', or '=' if preceded by escape
-- 0b11101 - 'y', or '*' if preceded by escape
-- 0b11110 - 'z', or '&' if preceded by escape
+- 0b11101 - 'y', or '"' if preceded by escape
+- 0b11110 - 'z', or ''' if preceded by escape
 - 0b11111 - (reserved)
 
 Behavior of Padding:
@@ -101,12 +101,12 @@ To efficiently encode lowercase letters (a-z) in the keyword field, we use a bas
 - 0b10110 - 'r', or '?' if preceded by escape, or 'R' if preceded by upper case escape
 - 0b10111 - 's', or '!' if preceded by escape, or 'S' if preceded by upper case escape
 - 0b11000 - 't', or '@' if preceded by escape, or 'T' if preceded by upper case escape
-- 0b11001 - 'u', or '#' if preceded by escape, or 'U' if preceded by upper case escape
+- 0b11001 - 'u', or '*' if preceded by escape, or 'U' if preceded by upper case escape
 - 0b11010 - 'v', or '$' if preceded by escape, or 'V' if preceded by upper case escape
 - 0b11011 - 'w', or '+' if preceded by escape, or 'W' if preceded by upper case escape
 - 0b11100 - 'x', or '=' if preceded by escape, or 'X' if preceded by upper case escape
-- 0b11101 - 'y', or '*' if preceded by escape, or 'Y' if preceded by upper case escape
-- 0b11110 - 'z', or '&' if preceded by escape, or 'Z' if preceded by upper case escape
+- 0b11101 - 'y', or '"' if preceded by escape, or 'Y' if preceded by upper case escape
+- 0b11110 - 'z', or ''' if preceded by escape, or 'Z' if preceded by upper case escape
 - 0b11111 - '->' (upper case escape, indicates the next character is upper case), or '<' if preceded by escape, '>' if preceded by upper case escape.
 
 Behavior of Padding:

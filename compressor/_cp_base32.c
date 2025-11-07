@@ -139,7 +139,7 @@ void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, size_t* index,
         case 't':
             _cp_base32_write_5_bits(buf, offset, index, 24);
             break;
-        case '#':
+        case '*':
             _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'u':
             _cp_base32_write_5_bits(buf, offset, index, 25);
@@ -159,12 +159,12 @@ void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, size_t* index,
         case 'x':
             _cp_base32_write_5_bits(buf, offset, index, 28);
             break;
-        case '*':
+        case '"':
             _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'y':
             _cp_base32_write_5_bits(buf, offset, index, 29);
             break;
-        case '&':
+        case '\'':
             _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'z':
             _cp_base32_write_5_bits(buf, offset, index, 30);
@@ -409,7 +409,7 @@ bool _cp_base32_decode_escape(_cp_Buffer* buf, size_t offset, size_t index, _cp_
             _cp_buffer_append_char(out, '@');
             break;
         case 25:
-            _cp_buffer_append_char(out, '#');
+            _cp_buffer_append_char(out, '*');
             break;
         case 26:
             _cp_buffer_append_char(out, '$');
@@ -421,10 +421,10 @@ bool _cp_base32_decode_escape(_cp_Buffer* buf, size_t offset, size_t index, _cp_
             _cp_buffer_append_char(out, '=');
             break;
         case 29:
-            _cp_buffer_append_char(out, '*');
+            _cp_buffer_append_char(out, '"');
             break;
         case 30:
-            _cp_buffer_append_char(out, '&');
+            _cp_buffer_append_char(out, '\'');
             break;
         case 31:
             // Reserved character. Append nothing but log warning.
