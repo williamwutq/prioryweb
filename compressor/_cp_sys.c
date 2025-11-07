@@ -24,12 +24,17 @@ bool is_smaller(const compare_t cmp) {
 }
 
 // System
+static void _cp_clean() {
+    _cp_free_buffer_pool();
+}
+
 void _cp_init(){
     _cp_init_buffer_pool();
 }
 
 void _cp_die(const char* msg) {
     fprintf(stderr, "Fatal error: %s\n", msg);
+    _cp_clean();
     exit(EXIT_FAILURE);
 }
 
@@ -49,7 +54,7 @@ void _cp_debug(const char* msg) {
 }
 
 void _cp_finish() {
-    _cp_free_buffer_pool();
+    _cp_clean();
     fprintf(stdout, "Compression finished successfully.\n");
     exit(EXIT_SUCCESS);
 }
