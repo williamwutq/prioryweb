@@ -87,13 +87,13 @@ void _cp_add_null_terminator_if_not_exists(_cp_Buffer* buf);
  * The EOF character is represented as '\x1A' (ASCII 26) for compatibility with old DOS systems.
  * @param buf The buffer to modify.
  */
-void _cp_add_eof_if_exists(_cp_Buffer* buf);
+void _cp_remove_eof_if_exists(_cp_Buffer* buf);
 /**
  * Adds an EOF character to the end of the buffer if it does not already exist.
  * Expands the buffer if necessary to accommodate the EOF character.
  * This is to offer compatibility with old DOS systems that use '\x1A' (ASCII 26) as EOF marker.
  * @param buf The buffer to modify.
  */
-void _cp_remove_eof_if_not_exists(_cp_Buffer* buf);
+void _cp_add_eof_if_not_exists(_cp_Buffer* buf);
 
 #endif // _CP_IO_H

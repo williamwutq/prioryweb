@@ -115,7 +115,7 @@ void _cp_add_null_terminator_if_not_exists(_cp_Buffer* buf) {
     }
 }
 
-void _cp_add_eof_if_exists(_cp_Buffer* buf) {
+void _cp_remove_eof_if_exists(_cp_Buffer* buf) {
     if (buf == NULL || buf->size == 0) {
         return;
     }
@@ -124,7 +124,7 @@ void _cp_add_eof_if_exists(_cp_Buffer* buf) {
     }
 }
 
-void _cp_remove_eof_if_not_exists(_cp_Buffer* buf) {
+void _cp_add_eof_if_not_exists(_cp_Buffer* buf) {
     if (buf == NULL) {
         return;
     }
