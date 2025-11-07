@@ -1,4 +1,33 @@
 #ifndef _CP_SYS_H
+/**
+ * @file _cp_sys.h
+ * @brief Core system functions and types for the compression library.
+ * This header defines essential system functions, types, and macros used throughout the compression library.
+ * It includes initialization, error handling, logging, and buffer management functionalities.
+ * The types defined here include a byte type, a boolean type, and a comparison type used for various comparisons.
+ * The buffer structure defined here is a simple dynamic array used for storing data during compression operations.
+ * This file is intended to be included by other components of the compression library to provide consistent system-level functionality.
+ * This file is part of the Compression Library.
+ * 
+ * Detail about buffer management:
+ * The buffer management functions provide a simple interface for creating, expanding, copying, and manipulating dynamic
+ * buffers. These buffers are used to hold data during compression, decompression, and general data processing tasks.
+ * The buffer structure consists of a data pointer, size, and capacity. The functions allow for efficient memory management
+ * by reusing buffers from a pool when possible, reducing the overhead of frequent allocations and deallocations.
+ * A buffer pool is maintained to store reusable buffers, which helps improve performance in scenarios with frequent buffer usage.
+ * By default, buffers are created with a predefined size of 4096 bytes, which is suitable for typical compression tasks.
+ * When a buffer needs to grow, it is expanded to accommodate the required size, doubling its capacity as needed.
+ * The buffer functions also provide utilities for converting between C strings and buffers, as well as for
+ * appending characters and accessing individual bytes within the buffer. The system library does not provide bit-level
+ * access for buffers, they can be found in each compression algorithm package.
+ * 
+ * Details about boolean and comparison types:
+ * The boolean type is defined as an unsigned char, allowing for simple true/false values. The comparison type is defined as a char,
+ * with specific values representing different comparison results, such as larger, smaller, equal, and undefined.
+ * Utility functions, is_larger() and is_smaller(), are provided to facilitate checking comparison results.
+ * 
+ * @author William Wu
+ */
 #define _CP_SYS_H
 #ifndef _STDDEF_H_
 #include <stddef.h>

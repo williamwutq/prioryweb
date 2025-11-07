@@ -1,5 +1,25 @@
 // An extension of the _cp_Buffer to provide optimizations for chaining multiple buffers together.
 #ifndef _CP_CHAIN_H
+/**
+ * @file _cp_chain.h
+ * @brief Buffer Chaining Module
+ * An extension of the _cp_Buffer to provide optimizations for chaining multiple buffers together.
+ * This package implements a linked list structure to hold multiple buffers, allowing efficient
+ * appending and concatenation of buffers without the need for continuous memory reallocations.
+ * 
+ * For large and reusable operations, using _cp_Buffer_Chain can significantly improve performance
+ * by minimizing memory copying and allocation overhead. However, for small or one-time operations,
+ * the overhead of managing the chain structure may outweigh the benefits.
+ * 
+ * To determine whether to use _cp_Buffer_Chain or simple _cp_Buffer, consider the size and frequency
+ * of buffer operations in your application. Since the minimum size of a _cp_Buffer is set to 4096 bytes,
+ * which is designed to fit the typical size of a data entry to be compressed, operations involving
+ * buffers much smaller than this size may not benefit from chaining. However, for tasks involving
+ * processing large amounts of data to be compressed together, or compress multiple entries in sequence,
+ * using _cp_Buffer_Chain is recommended.
+ * 
+ * @author William Wu
+ */
 #define _CP_CHAIN_H
 #ifndef _CP_SYS_H_
 #include "_cp_sys.h"

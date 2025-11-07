@@ -1,4 +1,19 @@
 #ifndef _CP_IO_H
+/**
+ * @file _cp_io.h
+ * @brief  Input/output Utility Module.
+ * 
+ * This module provides functions to read from and write to files and standard input/output using the _cp_Buffer structure.
+ * It includes functions to read entire files into buffers, write buffers to files, and handle null terminators and EOF characters.
+ * The functions ensure that buffers are expanded as needed to accommodate the data being read or written.
+ * 
+ * Functions provided by this module include all necessary I/O operations for working with _cp_Buffer objects,
+ * such as reading from files, writing to files, appending data, and managing special characters like null terminators and EOF markers.
+ * These functions are generally preferable than using standard C I/O functions directly or use the print functions in the default system
+ * module, as they are specifically designed to work with the _cp_Buffer structure for files.
+ * 
+ * @author William Wu
+ */
 #define _CP_IO_H
 #ifndef _STDDEF_H_
 #include <stddef.h>
