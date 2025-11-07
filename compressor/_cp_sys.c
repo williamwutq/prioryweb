@@ -285,6 +285,18 @@ _cp_Buffer* _cp_buffer_from_cstr_inplace(const char* str) {
     return buf;
 }
 
+size_t _cp_buffer_to_lowercase(_cp_Buffer* buf) {
+    if (buf == NULL) return 0;
+    size_t changed = 0;
+    for (size_t i = 0; i < buf->size; i++) {
+        if (buf->data[i] >= 'A' && buf->data[i] <= 'Z') {
+            buf->data[i] += 32;
+            changed++;
+        }
+    }
+    return changed;
+}
+
 _cp_Buffer* _cp_buffer_concat(const _cp_Buffer* buf1, const _cp_Buffer* buf2) {
     if (buf1 == NULL || buf2 == NULL) return NULL;
     _cp_Buffer* bufn = _cp_buffer_create();

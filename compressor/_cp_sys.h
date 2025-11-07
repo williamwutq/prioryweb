@@ -426,6 +426,12 @@ _cp_Buffer* _cp_buffer_from_cstr(const char* str);
  */
 _cp_Buffer* _cp_buffer_from_cstr_inplace(const char* str);
 /**
+ * Converts all uppercase characters in the buffer to lowercase in place.
+ * @param buf The buffer to convert.
+ * @return The number of characters converted to lowercase.
+ */
+size_t _cp_buffer_to_lowercase(_cp_Buffer* buf);
+/**
  * Concatenates two buffers into a new buffer. Note that this function
  * performs memory copying. The original buffers remain unaffected.
  * @param buf1 The first buffer.
