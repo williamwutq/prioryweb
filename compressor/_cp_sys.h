@@ -63,6 +63,12 @@ void _cp_debug(const char* msg);
  * @return Never returns; exits the program.
  */
 void _cp_finish(void);
+/**
+ * Asserts that a memory allocation was successful.
+ * If the pointer is NULL, it outputs a fatal error message and exits the program.
+ * @param ptr The pointer to check.
+ */
+void _cp_assertmem(const void* ptr);
 
 // Math macros
 #define min(a,b) ((a) < (b) ? (a) : (b))

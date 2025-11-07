@@ -54,6 +54,12 @@ void _cp_finish() {
     exit(EXIT_SUCCESS);
 }
 
+void _cp_assertmem(const void* ptr) {
+    if (ptr == NULL) {
+        _cp_die("Memory allocation failed.");
+    }
+}
+
 // Memory buffer
 
 _cp_Buffer** buffers = NULL;
