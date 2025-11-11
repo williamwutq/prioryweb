@@ -104,5 +104,25 @@ bool _cp_base32_decode_nonescape(_cp_Buffer* buf, size_t offset, size_t index, _
  * @param out The output buffer to write decoded characters into.
  */
 void _cp_base32_decode(_cp_Buffer* buf, size_t offset, _cp_Buffer* out);
+/**
+ * Checks the format of a buffer containing string to be base32 encoded.
+ * @param buf The buffer containing base32 encoded data.
+ * @param start The starting index to check.
+ * @param size The size of the data string to check.
+ * @param ignore_premature If set to true, if a null terminator is encountered before size, the function returns false
+ * because the string is not properly formatted. If false, the function arrives at the end of size regardless of null terminators.
+ * @return Whether the buffer format is valid for base32 encoding.
+ */
+bool _cp_base32_check_format(const _cp_Buffer* buf, const size_t start, const size_t size, const bool ignore_premature);
+/**
+ * Corrects the format of a buffer containing string to be base32 encoded in place.
+ * Invalid characters are replaced with spaces or appropriate substitutes.
+ * @param buf The buffer containing base32 encoded data.
+ * @param start The starting index to correct.
+ * @param size The size of the data string to correct.
+ * @param ignore_premature If set to true, if a null terminator is encountered before size, the function stops correcting
+ * further characters. If false, the function continues correcting until the end of size.
+ */
+void _cp_base32_correct_format(const _cp_Buffer* buf, const size_t start, const size_t size, const bool ignore_premature);
 
 #endif // _CP_BASE32_H_;

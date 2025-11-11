@@ -1,4 +1,33 @@
 #ifndef _CP_SYS_H
+/**
+ * @file _cp_sys.h
+ * @brief Core system functions and types for the compression library.
+ * This header defines essential system functions, types, and macros used throughout the compression library.
+ * It includes initialization, error handling, logging, and buffer management functionalities.
+ * The types defined here include a byte type, a boolean type, and a comparison type used for various comparisons.
+ * The buffer structure defined here is a simple dynamic array used for storing data during compression operations.
+ * This file is intended to be included by other components of the compression library to provide consistent system-level functionality.
+ * This file is part of the Compression Library.
+ * 
+ * Detail about buffer management:
+ * The buffer management functions provide a simple interface for creating, expanding, copying, and manipulating dynamic
+ * buffers. These buffers are used to hold data during compression, decompression, and general data processing tasks.
+ * The buffer structure consists of a data pointer, size, and capacity. The functions allow for efficient memory management
+ * by reusing buffers from a pool when possible, reducing the overhead of frequent allocations and deallocations.
+ * A buffer pool is maintained to store reusable buffers, which helps improve performance in scenarios with frequent buffer usage.
+ * By default, buffers are created with a predefined size of 4096 bytes, which is suitable for typical compression tasks.
+ * When a buffer needs to grow, it is expanded to accommodate the required size, doubling its capacity as needed.
+ * The buffer functions also provide utilities for converting between C strings and buffers, as well as for
+ * appending characters and accessing individual bytes within the buffer. The system library does not provide bit-level
+ * access for buffers, they can be found in each compression algorithm package.
+ * 
+ * Details about boolean and comparison types:
+ * The boolean type is defined as an unsigned char, allowing for simple true/false values. The comparison type is defined as a char,
+ * with specific values representing different comparison results, such as larger, smaller, equal, and undefined.
+ * Utility functions, is_larger() and is_smaller(), are provided to facilitate checking comparison results.
+ * 
+ * @author William Wu
+ */
 #define _CP_SYS_H
 #ifndef _STDDEF_H_
 #include <stddef.h>
@@ -34,6 +63,12 @@ void _cp_debug(const char* msg);
  * @return Never returns; exits the program.
  */
 void _cp_finish(void);
+/**
+ * Asserts that a memory allocation was successful.
+ * If the pointer is NULL, it outputs a fatal error message and exits the program.
+ * @param ptr The pointer to check.
+ */
+void _cp_assertmem(const void* ptr);
 
 // Math macros
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -147,6 +182,129 @@ typedef struct {
         .capacity = strlen(strptr) + 1 \
     })
 /**
+ * Creates a buffer from raw data without copying the data.
+ * The buffer's data pointer points directly to the provided data.
+ * The size and capacity of the buffer are set to the provided data size.
+ * The function assumes the correctness of the datasize, be aware of buffer overflows.
+ * 
+ * Unlike all the functions that create buffers, this macro does not perform any memory allocation,
+ * so there is no need to free the buffer created by this macro.
+ * However, the original data must remain valid for the lifetime of the buffer.
+ * 
+ * IMPORTANT: Since this macro does not perform memory allocation, the resulting buffer should not be freed.
+ * Freeing such a buffer would lead to undefined behavior. Since most functions in this package can dymanically
+ * allocate, reallocate, or free buffers, you may only pass the result of this macros to functions that
+ * explicitly protect it with const qualifier and does not attempt to free or reallocate the buffer.
+ * 
+ * IMPORTANT: DO NOT store the result of this macro into a non-const _cp_Buffer pointer, as this object is compiled
+ * statically on the stack and is not intended to be modified. For best practice, do not store the result of this macro
+ * into any variable at all, just use it directly as a parameter to functions that accept const _cp_Buffer*.
+ * @param dataptr Pointer to the raw data.
+ * @param datasize Size of the raw data in bytes.
+ * @return A new buffer referencing the raw data, or NULL if dataptr is NULL.
+ */
+#define _cp_buffer_from_data_const(dataptr, datasize) \
+    (&(_cp_Buffer){ \
+        .data = (byte*)(dataptr), \
+        .size = (datasize), \
+        .capacity = (datasize) \
+    })
+/**
+ * Creates a constant view of the buffer starting from the specified offset.
+ * The view shares the same data pointer as the original buffer, adjusted by the offset.
+ * The size and capacity of the view are reduced by the offset.
+ * 
+ * The function assumes that the offset is within the bounds of the original buffer.
+ * If this is not the case, the behavior is undefined.
+ * 
+ * This function does not perform any memory allocation, so there is no need to free the resulting buffer view.
+ * However, the original buffer must remain valid for the lifetime of the buffer view.
+ * 
+ * IMPORTANT: Since this macro does not perform memory allocation, the resulting buffer should not be freed.
+ * Freeing such a buffer would lead to undefined behavior. Since most functions in this package can dymanically
+ * allocate, reallocate, or free buffers, you may only pass the result of this macros to functions that
+ * explicitly protect it with const qualifier and does not attempt to free or reallocate the buffer.
+ * 
+ * IMPORTANT: DO NOT store the result of this macro into a non-const _cp_Buffer pointer, as this object is compiled
+ * statically on the stack and is not intended to be modified. For best practice, do not store the result of this macro
+ * into any variable at all, just use it directly as a parameter to functions that accept const _cp_Buffer*.
+ * @param bufptr Pointer to the original buffer.
+ * @param offset The offset from which the view starts.
+ * @return A new constant buffer view starting from the specified offset.
+ */
+#define _cp_buffer_view_const(bufptr, offset) \
+    (&(_cp_Buffer){ \
+        .data = (byte*)((bufptr)->data + (offset)), \
+        .size = (bufptr)->size - (offset), \
+        .capacity = (bufptr)->capacity - (offset) \
+    })
+/**
+ * Creates a constant window view of the buffer between the specified start and end offsets.
+ * The view shares the same data pointer as the original buffer, adjusted by the start offset.
+ * The size of the view is set to the difference between the end and start offsets.
+ * The capacity of the view is reduced by the start offset.
+ * 
+ * The function assumes that the start and end offsets are within the bounds of the original buffer
+ * and that start is less than or equal to end. If this is not the case, the behavior is undefined.
+ * 
+ * This function does not perform any memory allocation, so there is no need to free the resulting buffer view.
+ * However, the original buffer must remain valid for the lifetime of the buffer view.
+ * 
+ * It is the best practice to avoid use this macro if a few calls to _cp_buffer_char_at()
+ * or direct manipulation of the original buffer with offset calculations would suffice. This is because
+ * although this macro may improve performance and code readability in certain scenarios,
+ * it also increases the risk of creating dangling buffer views if the original buffer is modified or freed.
+ * 
+ * IMPORTANT: Since this macro does not perform memory allocation, the resulting buffer should not be freed.
+ * Freeing such a buffer would lead to undefined behavior. Since most functions in this package can dymanically
+ * allocate, reallocate, or free buffers, you may only pass the result of this macros to functions that
+ * explicitly protect it with const qualifier and does not attempt to free or reallocate the buffer.
+ * 
+ * IMPORTANT: DO NOT store the result of this macro into a non-const _cp_Buffer pointer, as this object is compiled
+ * statically on the stack and is not intended to be modified. For best practice, do not store the result of this macro
+ * into any variable at all, just use it directly as a parameter to functions that accept const _cp_Buffer*.
+ * @param bufptr Pointer to the original buffer.
+ * @param start The starting offset of the window.
+ * @param end The ending offset of the window.
+ * @return A new constant window buffer view between the specified offsets.
+ */
+#define _cp_buffer_window_consts(bufptr, start, end) \
+    (&(_cp_Buffer){ \
+        .data = (byte*)((bufptr)->data + (start)), \
+        .size = (end) - (start), \
+        .capacity = (bufptr)->capacity - (start) \
+    })
+/**
+ * Creates a constant trimmed view of the buffer with the specified new size.
+ * The view shares the same data pointer as the original buffer.
+ * The size of the view is set to the new size, while the capacity remains unchanged.
+ * 
+ * The function assumes that the new size is less than or equal to the original buffer's size.
+ * If this is not the case, the behavior is undefined.
+ * 
+ * This function does not perform any memory allocation, so there is no need to free the resulting buffer view.
+ * However, the original buffer must remain valid for the lifetime of the buffer view.
+ * 
+ * IMPORTANT: Since this macro does not perform memory allocation, the resulting buffer should not be freed.
+ * Freeing such a buffer would lead to undefined behavior. Since most functions in this package can dymanically
+ * allocate, reallocate, or free buffers, you may only pass the result of this macros to functions that
+ * explicitly protect it with const qualifier and does not attempt to free or reallocate the buffer.
+ * 
+ * IMPORTANT: DO NOT store the result of this macro into a non-const _cp_Buffer pointer, as this object is compiled
+ * statically on the stack and is not intended to be modified. For best practice, do not store the result of this macro
+ * into any variable at all, just use it directly as a parameter to functions that accept const _cp_Buffer*.
+ * @param bufptr Pointer to the original buffer.
+ * @param newsize The new size for the trimmed view.
+ * @return A new constant trimmed buffer view with the specified size.
+ */ 
+#define _cp_buffer_trim_const(bufptr, newsize) \
+    (&(_cp_Buffer){ \
+        .data = (byte*)((bufptr)->data), \
+        .size = (newsize), \
+        .capacity = (bufptr)->capacity \
+    })
+
+/**
  * Initializes the buffer pool.
  * This function allocates memory for a pool of reusable buffers.
  */
@@ -172,6 +330,15 @@ _cp_Buffer* _cp_pop_buffer_from_pool(void);
  * @return A pointer to the newly created buffer.
  */
 _cp_Buffer* _cp_buffer_create(void);
+/**
+ * Creates a new buffer with the specified capacity.
+ * It will not attempt to retrieve from the pool.
+ * You still can free the buffer with _cp_buffer_free() and it will put it back to the pool if its capacity is more or equal to DEFAULT_SIZE.
+ * For normal usage, prefer _cp_buffer_create() instead.
+ * @param capacity The desired capacity of the buffer.
+ * @return A pointer to the newly created buffer.
+ */
+_cp_Buffer* _cp_buffer_create_cap(size_t capacity);
 /**
  * Frees the buffer. If the buffer's capacity is equal to DEFAULT_SIZE,
  * it is returned to the pool for reuse. If larger, it is shrunk to
@@ -205,6 +372,14 @@ _cp_Buffer* _cp_buffer_double(_cp_Buffer* buf);
  * @return A new buffer that is a copy of the source, or NULL on allocation failure.
  */
 _cp_Buffer* _cp_buffer_copy(const _cp_Buffer* src);
+/**
+ * Creates a copy of a range within the given buffer.
+ * @param src The source buffer to copy from.
+ * @param start The starting index of the range (inclusive).
+ * @param end The ending index of the range (exclusive).
+ * @return A new buffer containing the specified range, or NULL on allocation failure.
+ */
+_cp_Buffer* _cp_buffer_copy_range(const _cp_Buffer* src, const size_t start, const size_t end);
 /**
  * Returns the remaining capacity of the buffer.
  * @param buf The buffer to check.
@@ -256,6 +431,12 @@ _cp_Buffer* _cp_buffer_from_cstr(const char* str);
  * @return A new buffer referencing the string data, or NULL if str is NULL or on allocation failure.
  */
 _cp_Buffer* _cp_buffer_from_cstr_inplace(const char* str);
+/**
+ * Converts all uppercase characters in the buffer to lowercase in place.
+ * @param buf The buffer to convert.
+ * @return The number of characters converted to lowercase.
+ */
+size_t _cp_buffer_to_lowercase(_cp_Buffer* buf);
 /**
  * Concatenates two buffers into a new buffer. Note that this function
  * performs memory copying. The original buffers remain unaffected.

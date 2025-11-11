@@ -139,7 +139,7 @@ void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, size_t* index,
         case 't':
             _cp_base32_write_5_bits(buf, offset, index, 24);
             break;
-        case '#':
+        case '*':
             _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'u':
             _cp_base32_write_5_bits(buf, offset, index, 25);
@@ -159,12 +159,12 @@ void _cp_base32_encode_char(_cp_Buffer* buf, const size_t offset, size_t* index,
         case 'x':
             _cp_base32_write_5_bits(buf, offset, index, 28);
             break;
-        case '*':
+        case '"':
             _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'y':
             _cp_base32_write_5_bits(buf, offset, index, 29);
             break;
-        case '&':
+        case '\'':
             _cp_base32_write_5_bits(buf, offset, index, 1);
         case 'z':
             _cp_base32_write_5_bits(buf, offset, index, 30);
@@ -409,7 +409,7 @@ bool _cp_base32_decode_escape(_cp_Buffer* buf, size_t offset, size_t index, _cp_
             _cp_buffer_append_char(out, '@');
             break;
         case 25:
-            _cp_buffer_append_char(out, '#');
+            _cp_buffer_append_char(out, '*');
             break;
         case 26:
             _cp_buffer_append_char(out, '$');
@@ -421,10 +421,10 @@ bool _cp_base32_decode_escape(_cp_Buffer* buf, size_t offset, size_t index, _cp_
             _cp_buffer_append_char(out, '=');
             break;
         case 29:
-            _cp_buffer_append_char(out, '*');
+            _cp_buffer_append_char(out, '"');
             break;
         case 30:
-            _cp_buffer_append_char(out, '&');
+            _cp_buffer_append_char(out, '\'');
             break;
         case 31:
             // Reserved character. Append nothing but log warning.
@@ -454,3 +454,85 @@ void _cp_base32_decode(_cp_Buffer* buf, size_t offset, _cp_Buffer* out) {
     }
 }
 
+bool _cp_base32_check_format(const _cp_Buffer* buf, const size_t start, const size_t size, const bool ignore_premature) {
+    if (buf == NULL) return false;
+    // Scan string character by character
+    int idx = start; char c;
+    while (idx < start + size) {
+        c = _cp_buffer_char_at(buf, idx);
+        // Normal character check
+        switch (c) {
+            case '\0':
+                if (!ignore_premature) return false;
+                // Otherwise it will go to idx++ break 4 lines below
+            case '\t': case '\n': case '\r':
+            case 32 ... 34: case 36: // ' ', '!', '"', '$'
+                idx++; continue;
+            case 38: // Only allowed in &nbsp; and &#160; sequences
+                if (_cp_buffer_bufcomp(buf, _cp_buffer_from_cstr_const("&nbsp;"), idx, 0, 6) == 0
+                 || _cp_buffer_bufcomp(buf, _cp_buffer_from_cstr_const("&#160;"), idx, 0, 6) == 0) {
+                    idx += 6;
+                    continue;
+                } else {
+                    return false;
+                }
+            case 39: case 42 ... 59: // ''', '*', '+', ',', '-', '.', '/', '0'-'9', ':', ';'
+            case 61: case 63: case 64: case 92: case 95: // '=', '?', '@', '\', '_'
+            case 97 ... 122: // 'a' - 'z'
+            case 124: // '|'
+                idx++; continue;
+            // &nbsp; (U+00A0)
+            case -62:
+                if ((unsigned char)_cp_buffer_char_at(buf, idx + 1) == 0xA0) {
+                    idx += 2; // Skip both bytes
+                    continue;
+                }
+            default:
+                return false;
+        }
+    }
+    return true;
+}
+
+void _cp_base32_correct_format(const _cp_Buffer* buf, const size_t start, const size_t size, const bool ignore_premature) {
+    if (buf == NULL) return;
+    // &nbsp; (U+00A0)
+    // Scan string character by character
+    int idx = start; char c;
+    while (idx < start + size) {
+        c = _cp_buffer_char_at(buf, idx);
+        // Normal character check
+        switch (c) {
+            case '\0':
+                if (!ignore_premature) ((char*)buf->data)[idx] = ' ';
+                // Otherwise it will go to idx++ break 4 lines below
+            case '\t': case '\n': case '\r':
+            case 32 ... 34: case 36: // ' ', '!', '"', '$'
+                idx++; continue;
+            case 38: // Only allowed in &nbsp; and &#160; sequences
+                if (_cp_buffer_bufcomp(buf, _cp_buffer_from_cstr_const("&nbsp;"), idx, 0, 6) == 0
+                 || _cp_buffer_bufcomp(buf, _cp_buffer_from_cstr_const("&#160;"), idx, 0, 6) == 0) {
+                    idx += 6;
+                    continue;
+                } else {
+                    ((char*)buf->data)[idx] = ' ';
+                }
+            case 39: case 42 ... 59: // ''', '*', '+', ',', '-', '.', '/', '0'-'9', ':', ';'
+            case 61: case 63: case 64: case 92: case 95: // '=', '?', '@', '\', '_'
+            case 97 ... 122: // 'a' - 'z'
+            case 124: // '|'
+                idx++; break;
+            // &nbsp; (U+00A0)
+            case -62:
+                if ((unsigned char)_cp_buffer_char_at(buf, idx + 1) == 0xA0) {
+                    idx += 2; // Skip both bytes
+                    continue;
+                }
+            default:
+                // Replace with space
+                ((char*)buf->data)[idx] = ' ';
+                idx++;
+                break;
+        }
+    }
+}

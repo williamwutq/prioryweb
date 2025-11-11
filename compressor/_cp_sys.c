@@ -24,12 +24,17 @@ bool is_smaller(const compare_t cmp) {
 }
 
 // System
+static void _cp_clean() {
+    _cp_free_buffer_pool();
+}
+
 void _cp_init(){
     _cp_init_buffer_pool();
 }
 
 void _cp_die(const char* msg) {
     fprintf(stderr, "Fatal error: %s\n", msg);
+    _cp_clean();
     exit(EXIT_FAILURE);
 }
 
@@ -49,9 +54,15 @@ void _cp_debug(const char* msg) {
 }
 
 void _cp_finish() {
-    _cp_free_buffer_pool();
+    _cp_clean();
     fprintf(stdout, "Compression finished successfully.\n");
     exit(EXIT_SUCCESS);
+}
+
+void _cp_assertmem(const void* ptr) {
+    if (ptr == NULL) {
+        _cp_die("Memory allocation failed.");
+    }
 }
 
 // Memory buffer
@@ -115,6 +126,21 @@ _cp_Buffer* _cp_buffer_create() {
         buf->capacity = DEFAULT_SIZE;
         return buf;
     }
+}
+
+_cp_Buffer* _cp_buffer_create_cap(size_t capacity) {
+    _cp_Buffer* buf = (_cp_Buffer*)malloc(sizeof(_cp_Buffer));
+    if (buf == NULL) {
+        return NULL; // Allocation failed
+    }
+    buf->data = (byte*)malloc(capacity);
+    if (buf->data == NULL) {
+        free(buf);
+        return NULL; // Allocation failed
+    }
+    buf->size = 0;
+    buf->capacity = capacity;
+    return buf;
 }
 
 void _cp_buffer_free(_cp_Buffer* buf) {
@@ -186,6 +212,24 @@ _cp_Buffer* _cp_buffer_copy(const _cp_Buffer* src) {
     return dest;
 }
 
+_cp_Buffer* _cp_buffer_copy_range(const _cp_Buffer* src, const size_t start, const size_t end) {
+    if (start >= end || end > src->size) {
+        return NULL; // Invalid range
+    }
+    _cp_Buffer* dest = _cp_buffer_create();
+    if (dest == NULL) {
+        return NULL; // Allocation failed
+    }
+    size_t range_size = end - start;
+    if (_cp_buffer_expand(dest, range_size) == NULL) {
+        _cp_buffer_free(dest);
+        return NULL; // Allocation failed
+    }
+    memcpy(dest->data, src->data + start, range_size);
+    dest->size = range_size;
+    return dest;
+}
+
 size_t _cp_buffer_remaining_capacity(const _cp_Buffer* buf) {
     if (buf == NULL) return 0;
     return buf->capacity - buf->size;
@@ -250,6 +294,18 @@ _cp_Buffer* _cp_buffer_from_cstr_inplace(const char* str) {
     buf->size = len;
     buf->capacity = len; // Capacity equals size
     return buf;
+}
+
+size_t _cp_buffer_to_lowercase(_cp_Buffer* buf) {
+    if (buf == NULL) return 0;
+    size_t changed = 0;
+    for (size_t i = 0; i < buf->size; i++) {
+        if (buf->data[i] >= 'A' && buf->data[i] <= 'Z') {
+            buf->data[i] += 32;
+            changed++;
+        }
+    }
+    return changed;
 }
 
 _cp_Buffer* _cp_buffer_concat(const _cp_Buffer* buf1, const _cp_Buffer* buf2) {
