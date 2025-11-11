@@ -1,3 +1,5 @@
+// Do not include this file in production builds.
+
 /**
  * Prints the binary representation of a buffer with specified separator and line length.
  * @param {Uint8Array} buffer
