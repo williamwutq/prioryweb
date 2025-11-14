@@ -74,6 +74,30 @@ function encodeBase32(input, output, offset) {
             write5Bits(output, outputIndex, offset, 0); // Write null terminator
             break;
         }
+        // Maybe optimize this with a map
+        // Support &nbsp; and &#160;
+        if (readString(input, inputIndex, 6) === '&nbsp;' || readString(input, inputIndex, 7) === '&#160;') {
+            // Write escape + 0b00011
+            write5Bits(output, outputIndex, offset, 1);
+            outputIndex++;
+            write5Bits(output, outputIndex, offset, 3);
+            inputIndex += 5;
+        }
+        // Support 0xC2A0
+        else if (charCode === 0xC2) {
+            let nextCharCode = CodecBuffer.readCharCode(input, inputIndex + 1);
+            if (nextCharCode === 0xA0) {
+                // Write escape + 0b00011
+                write5Bits(output, outputIndex, offset, 1);
+                outputIndex++;
+                write5Bits(output, outputIndex, offset, 3);
+                inputIndex++; // Skip next byte
+            } else {
+                // Unsupported character: use null terminator but does not terminate
+                write5Bits(output, outputIndex, offset, 0);
+            }
+        } 
+        else
         switch (charCode) {
             // 'a' to 'z' -> 0b00101 to 0b11110
             case charCode >= 97 && charCode <= 122:
