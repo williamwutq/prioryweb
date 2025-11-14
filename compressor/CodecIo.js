@@ -7,6 +7,7 @@ if (typeof process !== 'undefined' && process.versions != null && process.versio
     throw new Error('This module can only be used in a Node.js environment.');
 }
 import fs from 'fs';
+import path from 'path';
 
 /**
  * Checks whether a file exists at the given path.
@@ -20,6 +21,15 @@ function existsFile(path) {
     } catch (e) {
         return false;
     }
+}
+
+/**
+ * Finds the absolute path for a given relative path.
+ * @param {string} relativePath The relative path
+ * @returns {string} The absolute path
+ */
+function findPath(relativePath) {
+    return path.resolve(relativePath);
 }
 
 /**
@@ -49,4 +59,14 @@ function appendFile(path, data) {
     fs.appendFileSync(path, data);
 }
 
-export { existsFile, readFile, writeFile, appendFile };
+/**
+ * Creates a directory at the given path if it does not already exist.
+ * @param {string} path The directory path
+ */
+function createDirIfNotExists(path) {
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync(path, { recursive: true });
+    }
+}
+
+export { existsFile, findPath, readFile, writeFile, appendFile, createDirIfNotExists };
