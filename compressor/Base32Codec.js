@@ -10,25 +10,26 @@ import * as CodecBuffer from './CodecBuffer.js';
  * @returns {number} The 5-bit value read from the buffer.
  */
 function read5Bits(buffer, index, offset) {
-    const bitOffset = index * 5;
-    const byteOffset = Math.floor(bitOffset / 8) + offset;
-    const bitInByteOffset = bitOffset % 8;
+    const bit_pos   = index * 5;
+    const byte_pos  = Math.floor(bit_pos / 8) + offset;
+    const required  = byte_pos + 2;
 
-    CodecBuffer.ensureCapacity(buffer, byteOffset + 2); // Ensure enough space
-
+    // Bounds check: we need up to 2 bytes
+    if (required > buffer.size) {
+        return 0;
+    }
     let value = 0;
-
-    // Read the first byte
-    if (byteOffset < buffer.length) {
-        value |= (buffer[byteOffset] >> bitInByteOffset) & 0x1F;
+    // Read 5 bits one by one, MSB first
+    for (let i = 0; i < 5; ++i) {
+        const cur_bit   = bit_pos + i;
+        const cur_byte  = Math.floor(cur_bit / 8) + offset;
+        const cur_off   = cur_bit % 8;
+        // Extract bit: shift right by (7 - bit_position_in_byte), mask with 1
+        const bit = (buffer[cur_byte] >> (7 - cur_off)) & 1;
+        // Accumulate into value (shift left and OR)
+        value = (value << 1) | bit;
     }
-
-    // If the 5 bits span across two bytes
-    if (bitInByteOffset > 3 && (byteOffset + 1) < buffer.length) {
-        value |= (buffer[byteOffset + 1] << (8 - bitInByteOffset)) & 0x1F;
-    }
-
-    return value & 0x1F; // Ensure we only return the lower 5 bits
+    return value;
 }
 
 /**
@@ -271,7 +272,7 @@ function decodeBase32(input, output, offset) {
                     // Switch mode to unicode
                     mode = 4;
                     outputIndex++;
-                    break;
+                    continue;
                 case 5:
                 case 6:
                 case 7:
@@ -354,6 +355,7 @@ function decodeBase32(input, output, offset) {
                     // This is allowed because the current standard leave the behavior undefined
                     break;
             }
+            mode = 0;
         } else if (mode === 4) {
             // Unicode mode (values ignored)
             // Use value as length of how many 5-bit words to skip
