@@ -34,26 +34,32 @@ function read5Bits(buffer, index, offset) {
 /**
  * Writes a 5-bit value into the buffer starting at the specified offset.
  * @param {Uint8Array} buffer - The buffer to write to.
+ * @param {number} index - The index of the 5-bit unit to write.
  * @param {number} offset - The offset in 5-bit units.
  * @param {number} value - The 5-bit value to write.
  */
 function write5Bits(buffer, index, offset, value) {
-    const bitOffset = index * 5;
-    const byteOffset = Math.floor(bitOffset / 8) + offset;
-    const bitInByteOffset = bitOffset % 8;
+    // Ensure value is within 5 bits
+    if (value >= 32) value %= 32;
 
-    CodecBuffer.ensureCapacity(buffer, byteOffset + 2); // Ensure enough space
+    const bit_pos = index * 5;
+    const byte_pos = Math.floor(bit_pos / 8) + offset;
 
-    // Write to the first byte
-    if (byteOffset < buffer.length) {
-        buffer[byteOffset] &= ~(0x1F << bitInByteOffset); // Clear the bits
-        buffer[byteOffset] |= (value & 0x1F) << bitInByteOffset; // Set the bits
-    }
+    CodecBuffer.ensureCapacity(buffer, byte_pos + 2); // Ensure enough space
 
-    // If the 5 bits span across two bytes
-    if (bitInByteOffset > 3 && (byteOffset + 1) < buffer.length) {
-        buffer[byteOffset + 1] &= ~(0x1F >> (8 - bitInByteOffset)); // Clear the bits
-        buffer[byteOffset + 1] |= (value & 0x1F) >> (8 - bitInByteOffset); // Set the bits
+    // Write 5 bits one by one, MSB first
+    for (let i = 0; i < 5; ++i) {
+        const current_bit = bit_pos + i;
+        const target_byte = Math.floor(current_bit / 8) + offset;
+        const target_bit = current_bit % 8;
+        const bit_value = (value >> (4 - i)) & 1; // Extract bit (MSB first)
+
+        // Clear the target bit: mask with ~(1 << (7 - target_bit))
+        const mask = ~(1 << (7 - target_bit)) & 0xFF;
+        buffer[target_byte] &= mask;
+
+        // Set the target bit
+        buffer[target_byte] |= (bit_value << (7 - target_bit));
     }
 }
 
@@ -67,7 +73,10 @@ function write5Bits(buffer, index, offset, value) {
 function encodeBase32(input, output, offset) {
     // Read char with readCharCode until null terminator or end of input
     let inputIndex = 0;
-    let outputIndex = 0;
+    let outputIndex = 2;
+    // Always write the start symbol for compatibility
+    write5Bits(output, 0, offset, 1);
+    write5Bits(output, 1, offset, 0);
     while (true) {
         let charCode = CodecBuffer.readCharCode(input, inputIndex);
         if (inputIndex >= input.length || charCode === 0) {
@@ -76,7 +85,7 @@ function encodeBase32(input, output, offset) {
         }
         // Maybe optimize this with a map
         // Support &nbsp; and &#160;
-        if (readString(input, inputIndex, 6) === '&nbsp;' || readString(input, inputIndex, 7) === '&#160;') {
+        if (CodecBuffer.readString(input, inputIndex, 6) === '&nbsp;' || CodecBuffer.readString(input, inputIndex, 7) === '&#160;') {
             // Write escape + 0b00011
             write5Bits(output, outputIndex, offset, 1);
             outputIndex++;
@@ -99,15 +108,6 @@ function encodeBase32(input, output, offset) {
         } 
         else
         switch (charCode) {
-            // 'a' to 'z' -> 0b00101 to 0b11110
-            case charCode >= 97 && charCode <= 122:
-                write5Bits(output, outputIndex, offset, charCode - 92);
-                break;
-            // 'A' to 'Z' -> 0b00101 to 0b11110
-            // The format does not allow uppercase letters, but we represent them with lowercase
-            case charCode >= 65 && charCode <= 90:
-                write5Bits(output, outputIndex, offset, charCode - 60);
-                break;
             // '\' -> escape 0b00001
             case 92:
                 write5Bits(output, outputIndex, offset, 1); outputIndex++;
@@ -213,11 +213,189 @@ function encodeBase32(input, output, offset) {
                 write5Bits(output, outputIndex, offset, 5); outputIndex++;
                 write5Bits(output, outputIndex, offset, 30);
                 break;
-            // Unsupported character: use null terminator but does not terminate
             default:
-                write5Bits(output, outputIndex, offset, 0);
+                if (charCode >= 97 && charCode <= 122){
+                    // 'a' to 'z' -> 0b00101 to 0b11110
+                    write5Bits(output, outputIndex, offset, charCode - 92);
+                    break;
+                } else if (charCode >= 65 && charCode <= 90) {
+                    // 'A' to 'Z' -> 0b00101 to 0b11110
+                    // The format does not allow uppercase letters, but we represent them with lowercase
+                    write5Bits(output, outputIndex, offset, charCode - 60);
+                    break;
+                } else {
+                    // Unsupported character: use null terminator but does not terminate
+                    write5Bits(output, outputIndex, offset, 0);
+                }
         }
         inputIndex++;
         outputIndex++;
     }
 }
+
+/**
+ * Decodes a Base32 encoded buffer into a string and writes it into the output buffer.
+ * @param {Uint8Array} input - The input buffer containing Base32 encoded data.
+ * @param {Int8Array} output - The output buffer to write the decoded string.
+ * @param {number} offset - The offset in bytes to start reading from the input buffer.
+ */
+function decodeBase32(input, output, offset) {
+    // Setup
+    let inputIndex = 0;
+    let outputIndex = 0;
+    let mode = 0; // 0 = normal, 1 = escape
+
+    while (true) {
+        let value = read5Bits(input, inputIndex, offset);
+        if (mode === 1) {
+            // Escape mode
+            switch (value) {
+                case 0:
+                    // Start symbol: do nothing
+                    break;
+                case 1:
+                    CodecBuffer.writeCharCode(output, outputIndex, 92); // '\'
+                    outputIndex++;
+                    break;
+                case 2:
+                    CodecBuffer.writeCharCode(output, outputIndex, 9); // Tab
+                    outputIndex++;
+                    break;
+                case 3:
+                    CodecBuffer.writeCharCode(output, outputIndex, 194); // 0xC2
+                    outputIndex++;
+                    CodecBuffer.writeCharCode(output, outputIndex, 160); // 0xA0
+                    outputIndex++;
+                    break;
+                case 4:
+                    // Switch mode to unicode
+                    mode = 4;
+                    outputIndex++;
+                    break;
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                case 11:
+                case 12:
+                case 13:
+                case 14:
+                    CodecBuffer.writeCharCode(output, outputIndex, value + 43); // '0' to '9'
+                    outputIndex++;
+                    break;
+                case 15:
+                    CodecBuffer.writeCharCode(output, outputIndex, 46); // '.'
+                    outputIndex++;
+                    break;
+                case 16:
+                    CodecBuffer.writeCharCode(output, outputIndex, 44); // ','
+                    outputIndex++;
+                    break;
+                case 17:
+                    CodecBuffer.writeCharCode(output, outputIndex, 45); // '-'
+                    outputIndex++;
+                    break;
+                case 18:
+                    CodecBuffer.writeCharCode(output, outputIndex, 95); // '_'
+                    outputIndex++;
+                    break;
+                case 19:
+                    CodecBuffer.writeCharCode(output, outputIndex, 47); // '/'
+                    outputIndex++;
+                    break;
+                case 20:
+                    CodecBuffer.writeCharCode(output, outputIndex, 58); // ':'
+                    outputIndex++;
+                    break;
+                case 21:
+                    CodecBuffer.writeCharCode(output, outputIndex, 59); // ';'
+                    outputIndex++;
+                    break;
+                case 22:
+                    CodecBuffer.writeCharCode(output, outputIndex, 63); // '?'
+                    outputIndex++;
+                    break;
+                case 23:
+                    CodecBuffer.writeCharCode(output, outputIndex, 33); // '!'
+                    outputIndex++;
+                    break;
+                case 24:
+                    CodecBuffer.writeCharCode(output, outputIndex, 64); // '@'
+                    outputIndex++;
+                    break;
+                case 25:
+                    CodecBuffer.writeCharCode(output, outputIndex, 42); // '*'
+                    outputIndex++;
+                    break;
+                case 26:
+                    CodecBuffer.writeCharCode(output, outputIndex, 36); // '$'
+                    outputIndex++;
+                    break;
+                case 27:
+                    CodecBuffer.writeCharCode(output, outputIndex, 43); // '+'
+                    outputIndex++;
+                    break;
+                case 28:
+                    CodecBuffer.writeCharCode(output, outputIndex, 61); // '='
+                    outputIndex++;
+                    break;
+                case 29:
+                    CodecBuffer.writeCharCode(output, outputIndex, 34); // '"'
+                    outputIndex++;
+                    break;
+                case 30:
+                    CodecBuffer.writeCharCode(output, outputIndex, 39); // '''
+                    outputIndex++;
+                    break;
+                default:
+                    // Reserved: do nothing
+                    // This is allowed because the current standard leave the behavior undefined
+                    break;
+            }
+        } else if (mode === 4) {
+            // Unicode mode (values ignored)
+            // Use value as length of how many 5-bit words to skip
+            inputIndex += value;
+            // Maybe implement unicode later (not in C version)
+            mode = 0;
+        } else {
+            // Normal mode
+            switch (value) {
+                case 0:
+                    CodecBuffer.writeCharCode(output, outputIndex, 0); // Null terminator
+                    return;
+                case 1:
+                    mode = 1; // Escape
+                    break;
+                case 2:
+                    CodecBuffer.writeCharCode(output, outputIndex, 92); // \
+                    outputIndex++;
+                    break;
+                case 3:
+                    CodecBuffer.writeCharCode(output, outputIndex, 10); // Newline
+                    outputIndex++;
+                    CodecBuffer.writeCharCode(output, outputIndex, 13); // Write both newline and carriage return
+                    outputIndex++;
+                    break;
+                case 4:
+                    CodecBuffer.writeCharCode(output, outputIndex, 124); // '|'
+                    outputIndex++;
+                    break;
+                default:
+                    if (value >= 5 && value <= 30) {
+                        CodecBuffer.writeCharCode(output, outputIndex, value + 92); // 'a' to 'z'
+                        outputIndex++;
+                    } else {
+                        // Reserved: do nothing
+                        // This is allowed because the current standard leave the behavior undefined
+                    }
+                    break;
+            }
+        }
+        inputIndex++;
+    }
+}
+
+export { encodeBase32, decodeBase32, read5Bits, write5Bits };
