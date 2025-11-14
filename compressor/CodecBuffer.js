@@ -111,6 +111,15 @@ function shrinkBuffer(buffer, requiredLength) {
 }
 
 /**
+ * Shrinks the buffer to fit the string length plus null terminator.
+ * @param {Uint8Array} buffer - The original buffer.
+ * @returns {Uint8Array} The shrunk buffer.
+ */
+function shrinkBufferToFit(buffer) {
+    return shrinkBuffer(buffer, conservativeStrlen(buffer) + 1);
+}
+
+/**
  * Slices a portion of the buffer from start to end.
  * @param {Uint8Array} buffer - The original buffer.
  * @param {number} start - The starting index.
@@ -160,8 +169,25 @@ function strlen(buffer) {
     return length;
 }
 
+/**
+ * Returns the length of the given buffer treating trailing null bytes as non-existent.
+ * If, for some reason, the buffer has internal null bytes, this will still count up to the last non-null byte.
+ * For normal data, this behaves the same as strlen.
+ * @param {Uint8Array} buffer - The input buffer.
+ * @returns {number} The conservative length of the buffer.
+ */
+function conservativeStrlen(buffer) {
+    let length = 0;
+    let index = buffer.length - 1;
+    while (index >= 0 && buffer[index] === 0) {
+        index--;
+    }
+    return index + 1;
+}
+
 export {
     readCharCode, readString, writeCharCode, writeString,
     removeNullTerminatorIfPresent, addNullTerminatorIfNotPresent,
-    ensureCapacity, shrinkBuffer, sliceBuffer, concatBuffers, createBuffer, strlen
+    ensureCapacity, shrinkBuffer, shrinkBufferToFit, sliceBuffer, concatBuffers,
+    createBuffer, strlen, conservativeStrlen
 };
