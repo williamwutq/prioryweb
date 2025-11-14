@@ -9,6 +9,23 @@ function readCharCode(str, index) {
 }
 
 /**
+ * Reads a string from an Int8Array starting at the specified offset up to the specified length.
+ * @param {Int8Array} str - The input string.
+ * @param {number} offset - The starting index.
+ * @param {number} length - The maximum length of the string to read.
+ * @returns {string} The string read from the Int8Array.
+ */
+function readString(str, offset, length) {
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        const charCode = readCharCode(str, offset + i);
+        if (charCode === 0) break; // Null terminator
+        result += String.fromCharCode(charCode);
+    }
+    return result;
+}
+
+/**
  * Writes a character code at the specified index in an Int8Array treated as a string.
  * @param {Int8Array} str - The input string.
  * @param {number} index - The index where the character code will be written.
@@ -17,6 +34,46 @@ function readCharCode(str, index) {
 function writeCharCode(str, index, charCode) {
     ensureCapacity(str, index + 1);
     str[index] = charCode & 0xFF;
+}
+
+/**
+ * Writes a string into an Int8Array starting at the specified offset, the null terminator is not written.
+ * @param {Int8Array} str - The input string.
+ * @param {number} offset - The starting index.
+ * @param {string} value - The string to write.
+ */
+function writeString(str, offset, value) {
+    for (let i = 0; i < value.length; i++) {
+        writeCharCode(str, offset + i, value.charCodeAt(i));
+    }
+}
+
+/**
+ * Removes the null terminator from the end of the Int8Array if present.
+ * @param {Int8Array} str - The input string.
+ * @returns {Int8Array} The Int8Array without the null terminator.
+ */
+function removeNullTerminatorIfPresent(str) {
+    const length = str.length;
+    if (length > 0 && str[length - 1] === 0) {
+        return shrinkBuffer(str, length - 1);
+    }
+    return str;
+}
+
+/**
+ * Adds a null terminator to the end of the Int8Array if not already present.
+ * @param {Int8Array} str - The input string.
+ * @returns {Int8Array} The Int8Array with a null terminator.
+ */
+function addNullTerminatorIfNotPresent(str) {
+    const length = str.length;
+    if (length === 0 || str[length - 1] !== 0) {
+        const newBuffer = ensureCapacity(str, length + 1);
+        newBuffer[length] = 0;
+        return newBuffer;
+    }
+    return str;
 }
 
 /**
@@ -103,4 +160,8 @@ function strlen(buffer) {
     return length;
 }
 
-export { readCharCode, writeCharCode, ensureCapacity, shrinkBuffer, sliceBuffer, concatBuffers, createBuffer, strlen };
+export {
+    readCharCode, readString, writeCharCode, writeString,
+    removeNullTerminatorIfPresent, addNullTerminatorIfNotPresent,
+    ensureCapacity, shrinkBuffer, sliceBuffer, concatBuffers, createBuffer, strlen
+};
