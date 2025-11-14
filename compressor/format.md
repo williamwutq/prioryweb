@@ -42,7 +42,7 @@ To efficiently encode lowercase letters (a-z) in the keyword field, we use a bas
 - 0b00001 - '\' (escape, for numbers and special characters), or '\' if preceded by escape
 - 0b00010 - ' ' (space), or '\t' (tab) if preceded by escape
 - 0b00011 - '\n\r' (newline), or '&nbsp;' if preceded by escape
-- 0b00100 - '|' (separator), or starting unicode sequence if preceded by escape (In this case, the next 5 bits indicate the length of the unicode sequence in bytes, followed by unicde data encoded in digits (a-j for 0-9).)
+- 0b00100 - '|' (separator), or starting unicode sequence if preceded by escape (In this case, the next 5 bits indicate the length of the unicode sequence in 5 bit words, followed by unicde data encoded in digits (a-j for 0-9).)
 - 0b00101 - 'a', or '0' if preceded by escape
 - 0b00110 - 'b', or '1' if preceded by escape
 - 0b00111 - 'c', or '2' if preceded by escape
@@ -80,7 +80,7 @@ To efficiently encode lowercase letters (a-z) in the keyword field, we use a bas
 - 0b00001 - '\' (escape, for numbers and special characters), '\' if preceded by escape, or '\f' if preceded by upper case escape
 - 0b00010 - ' ' (space), '\t' (tab) if preceded by escape, '\v' if preceded by upper case escape
 - 0b00011 - '\n\r' (newline), or '&nbsp;' if preceded by escape, or '&thinsp;' if preceded by upper case escape
-- 0b00100 - '|' (separator), or starting unicode sequence if preceded by any escape (In this case, the next 5 bits indicate the length of the unicode sequence in bytes, followed by unicde data encoded in digits (a-j for 0-9).)
+- 0b00100 - '|' (separator), or starting unicode sequence if preceded by any escape (In this case, the next 5 bits indicate the length of the unicode sequence in 5 bit words, followed by unicde data encoded in digits (a-j for 0-9).)
 - 0b00101 - 'a', or '0' if preceded by escape, or 'A' if preceded by upper case escape
 - 0b00110 - 'b', or '1' if preceded by escape, or 'B' if preceded by upper case escape
 - 0b00111 - 'c', or '2' if preceded by escape, or 'C' if preceded by upper case escape
