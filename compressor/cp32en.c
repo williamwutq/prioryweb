@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     _cp_info("This program directly process and compress tag files. \
             If you want to add them into data files, you must manually link them with the data files.");
     if (argc < 2) {
-        printf("Usage: compressor <input_file1> <input_file2> ... <output_file>");
+        printf("Usage: cp32en <input_file1> <input_file2> ... <output_file>");
         _cp_info("This program encodes multiple input .tgss (Storage Tag Source)\
              into a single compressed output .tgvz (Compressed Tag Vector) \
              file using the custom base32 encoding.");
