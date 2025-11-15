@@ -75,7 +75,7 @@ void _cp_base32_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offs
  * @param index The index of the 5-bit value to read.
  * @return The 5-bit value read (0-31).
  */
-char _cp_base32_read_5_bits(_cp_Buffer* buf, size_t offset, size_t index);
+char _cp_base32_read_5_bits(const _cp_Buffer* buf, size_t offset, size_t index);
 
 /**
  * Decodes another character in escape mode and appends the corresponding character(s) to output buffer.
@@ -85,7 +85,7 @@ char _cp_base32_read_5_bits(_cp_Buffer* buf, size_t offset, size_t index);
  * @param out The output buffer to write decoded characters into.
  * @return true if an escape sequence was decoded, false otherwise.
  */
-bool _cp_base32_decode_escape(_cp_Buffer* buf, size_t offset, size_t index, _cp_Buffer* out);
+bool _cp_base32_decode_escape(const _cp_Buffer* buf, size_t offset, size_t index, _cp_Buffer* out);
 
 /**
  * Decodes another character in non-escape mode and appends the corresponding character(s) to output buffer.
@@ -95,7 +95,7 @@ bool _cp_base32_decode_escape(_cp_Buffer* buf, size_t offset, size_t index, _cp_
  * @param out The output buffer to write decoded characters into.
  * @return true if an escape sequence was detected, false otherwise.
  */
-bool _cp_base32_decode_nonescape(_cp_Buffer* buf, size_t offset, size_t index, _cp_Buffer* out);
+bool _cp_base32_decode_nonescape(const _cp_Buffer* buf, size_t offset, size_t index, _cp_Buffer* out);
 
 /**
  * Decodes a base32 encoded buffer back into a string and append to output buffer.
@@ -103,7 +103,7 @@ bool _cp_base32_decode_nonescape(_cp_Buffer* buf, size_t offset, size_t index, _
  * @param offset The byte offset in the buffer.
  * @param out The output buffer to write decoded characters into.
  */
-void _cp_base32_decode(_cp_Buffer* buf, size_t offset, _cp_Buffer* out);
+void _cp_base32_decode(const _cp_Buffer* buf, size_t offset, _cp_Buffer* out);
 /**
  * Checks the format of a buffer containing string to be base32 encoded.
  * @param buf The buffer containing base32 encoded data.
