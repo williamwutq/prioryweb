@@ -37,6 +37,16 @@ function writeCharCode(str, index, charCode) {
 }
 
 /**
+ * Appends a character code to the end of an Int8Array treated as a string.
+ * @param {Int8Array} str - The input string.
+ * @param {number} charCode - The character code to append.
+ */
+function appendCharCode(str, charCode) {
+    const length = conservativeStrlen(str);
+    writeCharCode(str, length, charCode);
+}
+
+/**
  * Writes a string into an Int8Array starting at the specified offset, the null terminator is not written.
  * @param {Int8Array} str - The input string.
  * @param {number} offset - The starting index.
@@ -112,11 +122,22 @@ function shrinkBuffer(buffer, requiredLength) {
 
 /**
  * Shrinks the buffer to fit the string length plus null terminator.
+ * For shrinking without null terminator, use shrinkBufferToMin.
  * @param {Uint8Array} buffer - The original buffer.
  * @returns {Uint8Array} The shrunk buffer.
  */
 function shrinkBufferToFit(buffer) {
     return shrinkBuffer(buffer, conservativeStrlen(buffer) + 1);
+}
+
+/**
+ * Shrinks the buffer to fit the string length without null terminator.
+ * To preserve null terminator, use shrinkBufferToFit.
+ * @param {Uint8Array} buffer - The original buffer.
+ * @returns {Uint8Array} The shrunk buffer.
+ */
+function shrinkBufferToMin(buffer) {
+    return shrinkBuffer(buffer, conservativeStrlen(buffer));
 }
 
 /**
@@ -186,8 +207,9 @@ function conservativeStrlen(buffer) {
 }
 
 export {
-    readCharCode, readString, writeCharCode, writeString,
+    readCharCode, readString, writeCharCode, writeString, appendCharCode,
     removeNullTerminatorIfPresent, addNullTerminatorIfNotPresent,
-    ensureCapacity, shrinkBuffer, shrinkBufferToFit, sliceBuffer, concatBuffers,
-    createBuffer, strlen, conservativeStrlen
+    ensureCapacity, shrinkBuffer, shrinkBufferToFit, shrinkBufferToMin,
+    sliceBuffer, concatBuffers, createBuffer,
+    strlen, conservativeStrlen
 };
