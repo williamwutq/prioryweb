@@ -168,6 +168,44 @@ function concatBuffers(buffers) {
 }
 
 /**
+ * Concatenates multiple Uint8Array buffers into a single buffer treating them as strings.
+ * If any input buffer has internal null bytes, those will be preserved.
+ * @param {Uint8Array[]} buffers - The array of buffers to concatenate.
+ * @returns {Uint8Array} The concatenated buffer.
+ */
+function concatBuffersAsString(buffers) {
+    let totalLength = buffers.reduce((sum, buf) => sum + conservativeStrlen(buf), 0);
+    let result = new Uint8Array(totalLength);
+    let offset = 0;
+    for (let buf of buffers) {
+        let len = conservativeStrlen(buf);
+        result.set(buf.subarray(0, len), offset);
+        offset += len;
+    }
+    return result;
+}
+
+/** 
+ * Splits a buffer into an array of buffers at each null terminator.
+ * @param {Uint8Array} buffer - The original buffer, can be used afterwards as it is not modified.
+ * @returns {Uint8Array[]} An array of new buffers split at null terminators.
+ */
+function splitBufferByNullTerminator(buffer) {
+    let segments = [];
+    let start = 0;
+    for (let i = 0; i < buffer.length; i++) {
+        if (buffer[i] === 0 && start < i) {
+            segments.push(copyBuffer(buffer, start, i - start));
+            start = i + 1;
+        }
+    }
+    if (start < buffer.length) {
+        segments.push(copyBuffer(buffer, start, buffer.length - start));
+    }
+    return segments;
+}
+
+/**
  * Creates a new Uint8Array buffer of the specified length.
  * @param {number} length - The length of the buffer to create in bytes, default is 256.
  * @returns {Uint8Array} The newly created buffer.
@@ -176,6 +214,18 @@ function createBuffer(length = 256) {
     return new Uint8Array(length);
 }
 
+/**
+ * Creates a copy of the given buffer. The original buffer is not modified.
+ * @param {Uint8Array} buffer - The buffer to copy.
+ * @param {number} [start=0] - The starting index to copy from, default is 0.
+ * @param {number} [length=buffer.length - start] - The number of bytes to copy, default is the rest of the buffer.
+ * @returns {Uint8Array} A new buffer that is a copy of the input buffer.
+ */
+function copyBuffer(buffer, start = 0, length = buffer.length - start) {
+    let newBuffer = new Uint8Array(length);
+    newBuffer.set(buffer.subarray(start, start + length));
+    return newBuffer;
+}
 /**
  * Returns the length of the given buffer treated as a string.
  * @param {Uint8Array} buffer - The input buffer.
@@ -210,6 +260,7 @@ export {
     readCharCode, readString, writeCharCode, writeString, appendCharCode,
     removeNullTerminatorIfPresent, addNullTerminatorIfNotPresent,
     ensureCapacity, shrinkBuffer, shrinkBufferToFit, shrinkBufferToMin,
-    sliceBuffer, concatBuffers, createBuffer,
+    sliceBuffer, concatBuffers, createBuffer, copyBuffer, 
+    concatBuffersAsString, splitBufferByNullTerminator,
     strlen, conservativeStrlen
 };
