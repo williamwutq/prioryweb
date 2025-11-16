@@ -9,6 +9,23 @@ function readCharCode(str, index) {
 }
 
 /**
+ * Reads a string from an Int8Array starting at the specified offset up to the specified length.
+ * @param {Int8Array} str - The input string.
+ * @param {number} offset - The starting index.
+ * @param {number} length - The maximum length of the string to read.
+ * @returns {string} The string read from the Int8Array.
+ */
+function readString(str, offset, length) {
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        const charCode = readCharCode(str, offset + i);
+        if (charCode === 0) break; // Null terminator
+        result += String.fromCharCode(charCode);
+    }
+    return result;
+}
+
+/**
  * Writes a character code at the specified index in an Int8Array treated as a string.
  * @param {Int8Array} str - The input string.
  * @param {number} index - The index where the character code will be written.
@@ -17,6 +34,56 @@ function readCharCode(str, index) {
 function writeCharCode(str, index, charCode) {
     ensureCapacity(str, index + 1);
     str[index] = charCode & 0xFF;
+}
+
+/**
+ * Appends a character code to the end of an Int8Array treated as a string.
+ * @param {Int8Array} str - The input string.
+ * @param {number} charCode - The character code to append.
+ */
+function appendCharCode(str, charCode) {
+    const length = conservativeStrlen(str);
+    writeCharCode(str, length, charCode);
+}
+
+/**
+ * Writes a string into an Int8Array starting at the specified offset, the null terminator is not written.
+ * @param {Int8Array} str - The input string.
+ * @param {number} offset - The starting index.
+ * @param {string} value - The string to write.
+ */
+function writeString(str, offset, value) {
+    for (let i = 0; i < value.length; i++) {
+        writeCharCode(str, offset + i, value.charCodeAt(i));
+    }
+}
+
+/**
+ * Removes the null terminator from the end of the Int8Array if present.
+ * @param {Int8Array} str - The input string.
+ * @returns {Int8Array} The Int8Array without the null terminator.
+ */
+function removeNullTerminatorIfPresent(str) {
+    const length = str.length;
+    if (length > 0 && str[length - 1] === 0) {
+        return shrinkBuffer(str, length - 1);
+    }
+    return str;
+}
+
+/**
+ * Adds a null terminator to the end of the Int8Array if not already present.
+ * @param {Int8Array} str - The input string.
+ * @returns {Int8Array} The Int8Array with a null terminator.
+ */
+function addNullTerminatorIfNotPresent(str) {
+    const length = str.length;
+    if (length === 0 || str[length - 1] !== 0) {
+        const newBuffer = ensureCapacity(str, length + 1);
+        newBuffer[length] = 0;
+        return newBuffer;
+    }
+    return str;
 }
 
 /**
@@ -54,6 +121,26 @@ function shrinkBuffer(buffer, requiredLength) {
 }
 
 /**
+ * Shrinks the buffer to fit the string length plus null terminator.
+ * For shrinking without null terminator, use shrinkBufferToMin.
+ * @param {Uint8Array} buffer - The original buffer.
+ * @returns {Uint8Array} The shrunk buffer.
+ */
+function shrinkBufferToFit(buffer) {
+    return shrinkBuffer(buffer, conservativeStrlen(buffer) + 1);
+}
+
+/**
+ * Shrinks the buffer to fit the string length without null terminator.
+ * To preserve null terminator, use shrinkBufferToFit.
+ * @param {Uint8Array} buffer - The original buffer.
+ * @returns {Uint8Array} The shrunk buffer.
+ */
+function shrinkBufferToMin(buffer) {
+    return shrinkBuffer(buffer, conservativeStrlen(buffer));
+}
+
+/**
  * Slices a portion of the buffer from start to end.
  * @param {Uint8Array} buffer - The original buffer.
  * @param {number} start - The starting index.
@@ -81,6 +168,44 @@ function concatBuffers(buffers) {
 }
 
 /**
+ * Concatenates multiple Uint8Array buffers into a single buffer treating them as strings.
+ * If any input buffer has internal null bytes, those will be preserved.
+ * @param {Uint8Array[]} buffers - The array of buffers to concatenate.
+ * @returns {Uint8Array} The concatenated buffer.
+ */
+function concatBuffersAsString(buffers) {
+    let totalLength = buffers.reduce((sum, buf) => sum + conservativeStrlen(buf), 0);
+    let result = new Uint8Array(totalLength);
+    let offset = 0;
+    for (let buf of buffers) {
+        let len = conservativeStrlen(buf);
+        result.set(buf.subarray(0, len), offset);
+        offset += len;
+    }
+    return result;
+}
+
+/** 
+ * Splits a buffer into an array of buffers at each null terminator.
+ * @param {Uint8Array} buffer - The original buffer, can be used afterwards as it is not modified.
+ * @returns {Uint8Array[]} An array of new buffers split at null terminators.
+ */
+function splitBufferByNullTerminator(buffer) {
+    let segments = [];
+    let start = 0;
+    for (let i = 0; i < buffer.length; i++) {
+        if (buffer[i] === 0 && start < i) {
+            segments.push(copyBuffer(buffer, start, i - start));
+            start = i + 1;
+        }
+    }
+    if (start < buffer.length) {
+        segments.push(copyBuffer(buffer, start, buffer.length - start));
+    }
+    return segments;
+}
+
+/**
  * Creates a new Uint8Array buffer of the specified length.
  * @param {number} length - The length of the buffer to create in bytes, default is 256.
  * @returns {Uint8Array} The newly created buffer.
@@ -89,6 +214,18 @@ function createBuffer(length = 256) {
     return new Uint8Array(length);
 }
 
+/**
+ * Creates a copy of the given buffer. The original buffer is not modified.
+ * @param {Uint8Array} buffer - The buffer to copy.
+ * @param {number} [start=0] - The starting index to copy from, default is 0.
+ * @param {number} [length=buffer.length - start] - The number of bytes to copy, default is the rest of the buffer.
+ * @returns {Uint8Array} A new buffer that is a copy of the input buffer.
+ */
+function copyBuffer(buffer, start = 0, length = buffer.length - start) {
+    let newBuffer = new Uint8Array(length);
+    newBuffer.set(buffer.subarray(start, start + length));
+    return newBuffer;
+}
 /**
  * Returns the length of the given buffer treated as a string.
  * @param {Uint8Array} buffer - The input buffer.
@@ -103,4 +240,27 @@ function strlen(buffer) {
     return length;
 }
 
-export { readCharCode, writeCharCode, ensureCapacity, shrinkBuffer, sliceBuffer, concatBuffers, createBuffer, strlen };
+/**
+ * Returns the length of the given buffer treating trailing null bytes as non-existent.
+ * If, for some reason, the buffer has internal null bytes, this will still count up to the last non-null byte.
+ * For normal data, this behaves the same as strlen.
+ * @param {Uint8Array} buffer - The input buffer.
+ * @returns {number} The conservative length of the buffer.
+ */
+function conservativeStrlen(buffer) {
+    let length = 0;
+    let index = buffer.length - 1;
+    while (index >= 0 && buffer[index] === 0) {
+        index--;
+    }
+    return index + 1;
+}
+
+export {
+    readCharCode, readString, writeCharCode, writeString, appendCharCode,
+    removeNullTerminatorIfPresent, addNullTerminatorIfNotPresent,
+    ensureCapacity, shrinkBuffer, shrinkBufferToFit, shrinkBufferToMin,
+    sliceBuffer, concatBuffers, createBuffer, copyBuffer, 
+    concatBuffersAsString, splitBufferByNullTerminator,
+    strlen, conservativeStrlen
+};

@@ -200,7 +200,6 @@ void _cp_base32_write_5_bits(_cp_Buffer* buf, const size_t offset, size_t* index
 
     size_t bit_pos = *index * 5;
     size_t byte_pos = bit_pos / 8 + offset;
-    size_t bit_offset = bit_pos % 8;
 
     // Ensure enough space: we may need up to 2 bytes (5 bits can cross byte boundary)
     size_t required = byte_pos + 2;
@@ -286,12 +285,11 @@ void _cp_base32_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offs
 }
 
 // Decoding functions
-char _cp_base32_read_5_bits(_cp_Buffer* buf, size_t offset, size_t index)
+char _cp_base32_read_5_bits(const _cp_Buffer* buf, size_t offset, size_t index)
 {
     if (buf == NULL || buf->data == NULL) return 0;
     size_t bit_pos   = index * 5;
     size_t byte_pos  = bit_pos / 8 + offset;
-    size_t bit_off   = bit_pos % 8;
 
     /* we never need more than 2 bytes for 5 bits */
     size_t required = byte_pos + 2;
@@ -311,7 +309,7 @@ char _cp_base32_read_5_bits(_cp_Buffer* buf, size_t offset, size_t index)
     return value;
 }
 
-bool _cp_base32_decode_nonescape(_cp_Buffer* buf, size_t offset, size_t index, _cp_Buffer* out) {
+bool _cp_base32_decode_nonescape(const _cp_Buffer* buf, size_t offset, size_t index, _cp_Buffer* out) {
     if (buf == NULL || out == NULL) return false;
 
     byte value = _cp_base32_read_5_bits(buf, offset, index);
@@ -349,7 +347,7 @@ bool _cp_base32_decode_nonescape(_cp_Buffer* buf, size_t offset, size_t index, _
     return false; // No escape sequence
 }
 
-bool _cp_base32_decode_escape(_cp_Buffer* buf, size_t offset, size_t index, _cp_Buffer* out) {
+bool _cp_base32_decode_escape(const _cp_Buffer* buf, size_t offset, size_t index, _cp_Buffer* out) {
     if (buf == NULL || out == NULL) return false;
 
     byte value = _cp_base32_read_5_bits(buf, offset, index);
@@ -438,7 +436,7 @@ bool _cp_base32_decode_escape(_cp_Buffer* buf, size_t offset, size_t index, _cp_
     return false; // No further escape sequence
 }
 
-void _cp_base32_decode(_cp_Buffer* buf, size_t offset, _cp_Buffer* out) {
+void _cp_base32_decode(const _cp_Buffer* buf, size_t offset, _cp_Buffer* out) {
     if (buf == NULL || out == NULL) return;
     bool in_escape = false;
     for (size_t index = 0; in_escape != 8; index ++) {
