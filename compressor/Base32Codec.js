@@ -400,4 +400,133 @@ function decodeBase32(input, output, offset) {
     }
 }
 
-export { encodeBase32, decodeBase32, read5Bits, write5Bits };
+/**
+ * Checks if the given input buffer conforms to the Base32 format.
+ * @param {Int8Array} input - The input buffer to check.
+ * @param {number} start - The starting index in the buffer.
+ * @param {number} size - The size of the buffer to check.
+ * @param {boolean} ignore_premature - Whether to ignore premature null terminators.
+ * @returns {boolean} True if the input conforms to the Base32 format, false otherwise.
+ */
+function checkFormatBase32(input, start, size, ignore_premature) {
+    // Scan string character by character
+    let index = 0;
+    while (index < size) {
+        let value = CodecBuffer.readCharCode(input, start + index);
+        switch (value) {
+            case 0:
+                if (!ignore_premature) return false;
+            case '\t': case '\n': case '\r':
+            case 32: case 33: case 34: case 36: // ' ', '!', '"', '$'
+                index++; continue;
+            case 38: // Only allowed in &nbsp; and &#160; sequences
+                const lookahead = CodecBuffer.readString(input, start + index, 6);
+                if (lookahead === '&nbsp;' || lookahead === '&#160;') {
+                    index += lookahead.length; 
+                    continue;
+                } else {
+                    return false;
+                }
+            case 39: case 61: case 63: case 64: case 92: case 95: // ''', '=', '?', '@', '\', '_'
+            case 124: // '|'
+                index++; continue;
+            // &nbsp; (U+00A0)
+            case -62:
+                if (CodecBuffer.readCharCode(input, start + index + 1) === -96) {
+                    index += 2;
+                    continue;
+                } else {
+                    return false;
+                }
+            default:
+                // 42 - 59
+                if (value >= 42 && value <= 59) {
+                    index++; continue;
+                }
+                // 97 - 122
+                else if (value >= 97 && value <= 122) {
+                    index++; continue;
+                }
+                // 65 - 90 (This version allows uppercase letters, even though the spec does not)
+                else if (value >= 65 && value <= 90) {
+                    index++; continue;
+                }
+                return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Corrects the input buffer to conform to the Base32 format by replacing invalid characters with spaces.
+ * @param {Int8Array} input - The input buffer to correct.
+ * @param {number} start - The starting index in the buffer.
+ * @param {number} size - The size of the buffer to correct.
+ * @param {boolean} ignore_premature - Whether to ignore premature null terminators.
+ * @returns {Int8Array} The corrected input buffer.
+ */
+function correctFormatBase32(input, start, size, ignore_premature) {
+    // Scan string character by character
+    let index = 0;
+    while (index < size) {
+        let value = CodecBuffer.readCharCode(input, start + index);
+        switch (value) {
+            case 0:
+                if (!ignore_premature) {
+                    // Replace with space
+                    CodecBuffer.writeCharCode(input, start + index, 32);
+                    index++;
+                    continue;
+                }
+                // Otherwise it will go to 4 lines below, pass
+            case '\t': case '\n': case '\r':
+            case 32: case 33: case 34: case 36: // ' ', '!', '"', '$'
+                index++; continue;
+            case 38: // Only allowed in &nbsp; and &#160; sequences
+                const lookahead = CodecBuffer.readString(input, start + index, 6);
+                if (lookahead === '&nbsp;' || lookahead === '&#160;') {
+                    index += lookahead.length; 
+                    continue;
+                } else {
+                    // Replace with space
+                    CodecBuffer.writeCharCode(input, start + index, 32);
+                    index++;
+                    continue;
+                }
+            case 39: case 61: case 63: case 64: case 92: case 95: // ''', '=', '?', '@', '\', '_'
+            case 124: // '|'
+                index++; continue;
+            // &nbsp; (U+00A0)
+            case -62:
+                if (CodecBuffer.readCharCode(input, start + index + 1) === -96) {
+                    index += 2;
+                    continue;
+                } else {
+                    // Replace with space
+                    CodecBuffer.writeCharCode(input, start + index, 32);
+                    index++;
+                    continue;
+                }
+            default:
+                // 42 - 59
+                if (value >= 42 && value <= 59) {
+                    index++; continue;
+                }
+                // 97 - 122
+                else if (value >= 97 && value <= 122) {
+                    index++; continue;
+                }
+                // 65 - 90 (This version allows uppercase letters, even though the spec does not)
+                else if (value >= 65 && value <= 90) {
+                    index++; continue;
+                }
+                // Replace with space
+                CodecBuffer.writeCharCode(input, start + index, 32);
+                index++;
+                continue;
+        }
+    }
+    return input;
+}
+
+export { encodeBase32, decodeBase32, read5Bits, write5Bits, checkFormatBase32, correctFormatBase32 };
