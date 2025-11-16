@@ -16,6 +16,9 @@ test: test.o $(LIB) # Default target
 cp32en: cp32en.o $(LIB) # 32-bit encoder program
 	$(CC) $(CFLAGS) -o cp32en cp32en.o $(LIB)
 
+cp32de: cp32de.o $(LIB) # 32-bit decoder program
+	$(CC) $(CFLAGS) -o cp32de cp32de.o $(LIB)
+
 libbundle: $(OBJS)
 	ar rcs $(LIB) $(OBJS)
 
