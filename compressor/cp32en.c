@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
         _cp_die("Output file path is empty.");
     }
     // If output file does not end with .tgvz, add the extension
+    bool allocated_last = false;
     if (strlen(last) < 5 || strcmp(last + strlen(last) - 5, ".tgvz") != 0) {
         char* new_last = (char*)malloc(strlen(last) + 6);
         if (new_last == NULL) {
@@ -34,6 +35,7 @@ int main(int argc, char *argv[]) {
         strcpy(new_last, last);
         strcat(new_last, ".tgvz");
         last = new_last;
+        allocated_last = true;
     }
     _cp_Buffer_Chain* inputs = _cp_buffer_chain_create();
     _cp_assertmem(inputs);
@@ -91,6 +93,9 @@ int main(int argc, char *argv[]) {
     // Write to output file
     _cp_Buffer* result = _cp_buffer_chain_embuffer(inputs); // This frees all things
     _cp_write_buffer_to_file(last, result);
+    if (allocated_last) {
+        free(last);
+    }
     _cp_buffer_free(result);
     printf("Done.\n");
     _cp_finish();
