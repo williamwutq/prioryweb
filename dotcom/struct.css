@@ -227,9 +227,8 @@ button, .button {
     outline: none;
 }
 
-.capsule-bottom-right {
+.capsule-bottom-right, .capsule-bottom-left {
     bottom: 12px; 
-    right: 12px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -241,11 +240,23 @@ button, .button {
     background-color: var(--accent-light);
 }
 
-.capsule-bottom-right .vertical-line {
+.capsule-bottom-right {
+    right: 12px;
+}
+
+.capsule-bottom-right .vertical-line, .capsule-bottom-left .vertical-line {
     height: 28px;
 }
 
-.capsule-bottom-right a {
+.capsule-bottom-right a, .capsule-bottom-left a {
     min-width: 50px;
     text-align: center;
+}
+
+.capsule-bottom-left a {
+    font-size: 1.5em;
+}
+
+.capsule-bottom-left {
+    left: 12px;
 }
