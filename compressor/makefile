@@ -1,5 +1,5 @@
 # Makefile for compressor library and test program
-# For any changes, run 'make libcompile' and 'make libbundle' to rebuild the library
+# For any changes, run 'make libcompile' and 'make libbundle' or just 'make libs'
 # What are library files? They are named _cp_*.* in this directory
 # The program files containing main are named without underscore prefix
 
@@ -24,6 +24,10 @@ libbundle: $(OBJS)
 
 libcompile: $(HEADS) $(IMPLS)
 	$(CC) $(CFLAGS) -c $(IMPLS)
+
+libs:
+	$(CC) $(CFLAGS) -c $(IMPLS)
+	ar rcs $(LIB) $(OBJS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
