@@ -66,3 +66,49 @@ byte _cp_base64_read_6_bits(const _cp_Buffer* buf, size_t offset, size_t index) 
 
     return value & 0x3F;
 }
+
+static const char decode_table_normal[64] = {
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+    'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+    'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+    'w', 'x', 'y', 'z', '0', '1', '2', '3',
+    '4', '5', '6', '7', '8', '9', 0xF8, '\\' // Escape character
+    // 0xF8 -> Assignment operator
+};
+
+static const char decode_table_escape[64] = {
+    '.', ',', '-', '_', '/', ':', ';', '?',
+    '!', '@', '#', '$', '+', '=', '*', '&',
+    '%', '^', '(', ')', '[', ']', '{', '}',
+    '<', '>', '\a','\b',0xA9, -15,'\e','\f',
+    -16, 0xD7,0xF7,-10, -11, -12, -6,'\n',
+    -13, 0xA0, 0xAE,'\r',' ', '\t',-5,'\v',
+    -14, -2, -3, -4, '\\', '|', '~', '`',
+    '"', '\'',-24, -25, -26, -27, -28, 0
+    // 0 -> null terminator
+    // A0 -> &nbsp;
+    // -2 -> &thinsp;
+    // -3 -> &ensp;
+    // -4 -> &emsp;
+    // A9 -> &copy;
+    // AE -> &reg;
+    // -5 -> &trade;
+    // F7 -> &div;
+    // -6 -> &#10003; (check mark)
+    // -10 -> &laquo;
+    // -11 -> &raquo;
+    // -12 -> &bull;
+    // -13 -> &hellip;
+    // -14 -> &mdash;
+    // -15 -> &deg;
+    // -16 -> &plusmn;
+    // -24 -> &larr;
+    // -25 -> &uarr;
+    // -26 -> &rarr;
+    // -27 -> &darr;
+    // -28 -> &harr;
+    // D7 -> &times;
+};
