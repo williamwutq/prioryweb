@@ -205,7 +205,6 @@ Special escape sequence:
   - Double Precision Floating Point Sequence: escape + d, followed by the double value encoded in standard Base64 format. This is useful for embedding floating-point values directly within the compressed data. Since the doubles used here are IEEE 754 double-precision binary floating-point format: binary64, there should be 11 Base64 characters following the escape + d.
 
 - Functional Characters:
-  - Start of Sequence: escape + s (This is typically not needed)
   - Terminator: \\\\ (escape + escape) or \\e (escape + e)
   - Separator: escape + :
   - Assignment: :

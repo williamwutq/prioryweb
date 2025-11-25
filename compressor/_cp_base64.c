@@ -115,7 +115,11 @@ static const char decode_table_escape[64] = {
 };
 
 void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* index, const unsigned int codepoint) {
-    if (codepoint <= 0x7F) {
+    if (codepoint == 0xA0) {
+        // &nbsp; -> escape + p
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 41);
+    } if (codepoint <= 0x7F) {
         // 1-byte UTF-8 -> 2 6-bit values
         _cp_base64_write_6_bits(buf, offset, (*index)++, 2);
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0xC0 | ((codepoint >> 6) & 0x1F)));
@@ -160,6 +164,18 @@ void _cp_base64_encode_ascii(_cp_Buffer* buf, const size_t offset, size_t* index
     } else {
         byte c;
         switch (code) {
+            case '\0':// NULL
+                c = 63; break;
+            case '\a':// 'a'
+                c = 26; break;
+            case '\b':// 'b'
+                c = 27; break;
+            case '\e':// 'e'
+                c = 30; break;
+            case '\f':// 'f'
+                c = 31; break;
+            case '\v':// 'v'
+                c = 47; break;
             case ' ': // 's'
                 c = 44; break;
             case '\t':// 't'
@@ -277,6 +293,13 @@ void _cp_base64_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offs
             // Invalid UTF-8, skip
             continue;
         }
+    }
+    // Write the terminator if the last two characters are not 63, 63
+    byte last1 = _cp_base64_read_6_bits(buf, offset, index - 1);
+    byte last2 = _cp_base64_read_6_bits(buf, offset, index - 2);
+    if (!(last1 == 63 && last2 == 63)) {
+        _cp_base64_write_6_bits(buf, offset, index++, 63); // Escape character
+        _cp_base64_write_6_bits(buf, offset, index++, 63);  // Null terminator
     }
 }
 
