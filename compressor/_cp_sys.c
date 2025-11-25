@@ -6,7 +6,7 @@
 typedef unsigned char byte;
 const uint16_t BLOCK_SIZE = 256;
 const uint16_t DEFAULT_SIZE = 256 * 16;
-const int DEBUG = 1;// Set to 1 to enable debug messages
+#define DEBUG 1 // Set to 1 to enable debug messages
 const bool false = 0;
 const bool true = 1;
 const compare_t inf_larger = 2;
@@ -47,9 +47,9 @@ void _cp_info(const char* msg) {
 }
 
 void _cp_debug(const char* msg) {
-    if (DEBUG) {
-        fprintf(stdout, "Debug: %s\n", msg);
-    }
+#if DEBUG
+    fprintf(stdout, "Debug: %s\n", msg);
+#endif
 }
 
 void _cp_finish() {
@@ -112,14 +112,14 @@ void _cp_infob(const _cp_Buffer* msg) {
 }
 
 void _cp_debugb(const _cp_Buffer* msg) {
-    if (DEBUG) {
-        if (msg == NULL || msg->data == NULL) {
-            fprintf(stdout, "Debug: (null)\n");
-        } else {
-            fprintf(stdout, "Debug: ");
-            _cp_buffer_print(msg);
-        }
+#if DEBUG
+    if (msg == NULL || msg->data == NULL) {
+        fprintf(stdout, "Debug: (null)\n");
+    } else {
+        fprintf(stdout, "Debug: ");
+        _cp_buffer_print(msg);
     }
+#endif
 }
 
 void _cp_init_buffer_pool() {
