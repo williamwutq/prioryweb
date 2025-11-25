@@ -305,5 +305,112 @@ void _cp_base64_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offs
 
 void _cp_base64_decode(const _cp_Buffer* buf, const size_t offset, _cp_Buffer* out) {
     if (buf == NULL || out == NULL) return;
-
+    bool in_escape = false;
+    for (size_t index = 0; in_escape != 8 && index * 6 / 8 + offset < buf->size; index++) {
+        byte value = _cp_base64_read_6_bits(buf, offset, index);
+        printf("Read 6 bits: %u\n at index %zu\n", value, index);
+        if (in_escape == 2) {
+            // Handle unicode
+        } else if (in_escape) {
+            // Look up escape table
+            char decoded = decode_table_escape[value];
+            if (decoded < 0) {
+                // Special HTML entity handling
+                switch (decoded) {
+                    case -2: // &thinsp;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x80');
+                        _cp_buffer_append_char(out, '\x89');
+                        break;
+                    case -3: // &ensp;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x80');
+                        _cp_buffer_append_char(out, '\x82');
+                        break;
+                    case -4: // &emsp;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x80');
+                        _cp_buffer_append_char(out, '\x83');
+                        break;
+                    case -5: // &trade;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x84');
+                        _cp_buffer_append_char(out, '\xA2');
+                        break;
+                    case -6: // &#10003; (check mark)
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x9C');
+                        _cp_buffer_append_char(out, '\x93');
+                        break;
+                    case -10: // &laquo;
+                        _cp_buffer_append_char(out, '\xC2');
+                        _cp_buffer_append_char(out, '\xAB');
+                        break;
+                    case -11: // &raquo;
+                        _cp_buffer_append_char(out, '\xC2');
+                        _cp_buffer_append_char(out, '\xBB');
+                        break;
+                    case -12: // &bull;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x80');
+                        _cp_buffer_append_char(out, '\xA2');
+                        break;
+                    case -13: // &hellip;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x80');
+                        _cp_buffer_append_char(out, '\xA6');
+                        break;
+                    case -14: // &mdash;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x80');
+                        _cp_buffer_append_char(out, '\x94');
+                        break;
+                    case -15: // &deg;
+                        _cp_buffer_append_char(out, '\xC2');
+                        _cp_buffer_append_char(out, '\xB0');
+                        break;
+                    case -16: // &plusmn;
+                        _cp_buffer_append_char(out, '\xC2');
+                        _cp_buffer_append_char(out, '\xB1');
+                        break;
+                    case -24: // &larr;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x86');
+                        _cp_buffer_append_char(out, '\x90');
+                        break;
+                    case -25: // &uarr;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x86');
+                        _cp_buffer_append_char(out, '\x91');
+                        break;
+                    case -26: // &rarr;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x86');
+                        _cp_buffer_append_char(out, '\x92');
+                        break;
+                    case -27: // &darr;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x86');
+                        _cp_buffer_append_char(out, '\x93');
+                        break;
+                    case -28: // &harr;
+                        _cp_buffer_append_char(out, '\xE2');
+                        _cp_buffer_append_char(out, '\x86');
+                        _cp_buffer_append_char(out, '\x94');
+                        break;
+                    default:
+                        break;
+                }
+            } else if (decoded == 63) {
+                in_escape = 8; // Null terminator, end decoding
+            }
+        } else {
+            char decoded = decode_table_normal[value];
+            if (decoded == 63) { // Escape character
+                in_escape = 1; // Enter escape mode
+            } else {
+                _cp_buffer_append_char(out, decoded);
+            }
+        }
+    }
 }

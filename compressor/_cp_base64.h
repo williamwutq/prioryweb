@@ -29,6 +29,9 @@ byte _cp_base64_read_6_bits(const _cp_Buffer* buf, size_t offset, size_t index);
 
 /**
  * Decodes a base64 encoded buffer back into a string and append to output buffer.
+ * 
+ * The input buffer must not terminate until two consecutive escape characters (63, 63) are found.
+ * It is recommended to pad this buffer with 1s instead of zeros to avoid confusion with null terminator.
  * @param buf The buffer containing base64 encoded data.
  * @param offset The byte offset in the buffer.
  * @param out The output buffer to write decoded characters into.
@@ -61,5 +64,7 @@ void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* ind
  * @param code The ASCII character to encode.
  */
 void _cp_base64_encode_ascii(_cp_Buffer* buf, const size_t offset, size_t* index, const char code);
+
+// There is no format checking because this custom base64 can encode anything. There is no "invalid" format.
 
 #endif // _CP_BASE64_H_
