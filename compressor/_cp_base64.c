@@ -144,6 +144,102 @@ void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* ind
     }
 }
 
+void _cp_base64_encode_ascii(_cp_Buffer* buf, const size_t offset, size_t* index, const char code) {
+    if (code >= 'A' && code <= 'Z') {
+        // A-Z -> 0-25
+        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(code - 65));
+    } else if (code >= 'a' && code <= 'z') {
+        // a-z -> 26-51
+        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(code - 71));
+    } else if (code >= '0' && code <= '9') {
+        // 0-9 -> 52-61
+        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(code + 4));
+    } else if (code == ':') {
+        // : -> 62
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 62);
+    } else {
+        byte c;
+        switch (code) {
+            case ' ': // 's'
+                c = 44; break;
+            case '\t':// 't'
+                c = 45; break;
+            case '\n':// 'n'
+                c = 39; break;
+            case '\r':// 'r'
+                c = 43; break;
+            case '.': // 'A'
+                c = 0; break;
+            case ',': // 'B'
+                c = 1; break;
+            case '-': // 'C'
+                c = 2; break;
+            case '_': // 'D'
+                c = 3; break;
+            case '/': // 'E'
+                c = 4; break;
+            case ':': // 'F'
+                c = 5; break;
+            case ';': // 'G'
+                c = 6; break;
+            case '?': // 'H'
+                c = 7; break;
+            case '!': // 'I'
+                c = 8; break;
+            case '@': // 'J'
+                c = 9; break;
+            case '#': // 'K'
+                c = 10; break;
+            case '$': // 'L'
+                c = 11; break;
+            case '+': // 'M'
+                c = 12; break;
+            case '=': // 'N'
+                c = 13; break;
+            case '*': // 'O'
+                c = 14; break;
+            case '&': // 'P'
+                c = 15; break;
+            case '%': // 'Q'
+                c = 16; break;
+            case '^': // 'R'
+                c = 17; break;
+            case '(': // 'S'
+                c = 18; break;
+            case ')': // 'T'
+                c = 19; break;
+            case '[': // 'U'
+                c = 20; break;
+            case ']': // 'V'
+                c = 21; break;
+            case '{': // 'W'
+                c = 22; break;
+            case '}': // 'X'
+                c = 23; break;
+            case '<': // 'Y'
+                c = 24; break;
+            case '>': // 'Z'
+                c = 25; break;
+            case '\\':// '0'
+                c = 52; break;
+            case '|': // '1'
+                c = 53; break;
+            case '~': // '2'
+                c = 54; break;
+            case '`': // '3'
+                c = 55; break;
+            case '"': // '4'
+                c = 56; break;
+            case '\'':// '5'
+                c = 57; break;
+            default:
+                return;     // Skip unsupported characters
+        }
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 63); // Escape character + 
+        _cp_base64_write_6_bits(buf, offset, (*index)++, c);
+    }
+}
+
 void _cp_base64_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offset) {
     if (buf == NULL || str == NULL) return;
 
