@@ -51,7 +51,7 @@ void _cp_base64_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offs
  * @param index Pointer to the current index of 6-bit values in the buffer; will be updated.
  * @param codepoint The Unicode codepoint to encode.
  */
-void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* index, const u_int32_t codepoint);
+void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* index, const unsigned int codepoint);
 
 /**
  * Encodes an ASCII character into base64 format and writes to buffer.

@@ -114,7 +114,7 @@ static const char decode_table_escape[64] = {
     // D7 -> &times;
 };
 
-void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* index, const u_int32_t codepoint) {
+void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* index, const unsigned int codepoint) {
     if (codepoint <= 0x7F) {
         // 1-byte UTF-8 -> 2 6-bit values
         _cp_base64_write_6_bits(buf, offset, (*index)++, 2);
@@ -257,19 +257,20 @@ void _cp_base64_encode(_cp_Buffer* buf, const _cp_Buffer* str, const size_t offs
         char c4 = _cp_buffer_char_at(str, i + 3);
         if ((unsigned char)c1 <= 127) {
             // If this is ASCII character
+            _cp_base64_encode_ascii(buf, offset, &index, c1);
         } else if ((unsigned char)c1 >= 0xC2 && (unsigned char)c1 <= 0xDF) {
             // 2-byte UTF-8
-            u_int32_t codepoint = ((u_int32_t)(c1 & 0x1F) << 6) | (u_int32_t)(c2 & 0x3F);
+            unsigned int codepoint = ((unsigned int)(c1 & 0x1F) << 6) | (unsigned int)(c2 & 0x3F);
             _cp_base64_encode_unicode(buf, offset, &index, codepoint);
             i += 1;
         } else if ((unsigned char)c1 >= 0xE0 && (unsigned char)c1 <= 0xEF) {
             // 3-byte UTF-8
-            u_int32_t codepoint = ((u_int32_t)(c1 & 0x0F) << 12) | ((u_int32_t)(c2 & 0x3F) << 6) | (u_int32_t)(c3 & 0x3F);
+            unsigned int codepoint = ((unsigned int)(c1 & 0x0F) << 12) | ((unsigned int)(c2 & 0x3F) << 6) | (unsigned int)(c3 & 0x3F);
             _cp_base64_encode_unicode(buf, offset, &index, codepoint);
             i += 2;
         } else if ((unsigned char)c1 >= 0xF0 && (unsigned char)c1 <= 0xF4) {
             // 4-byte UTF-8
-            u_int32_t codepoint = ((u_int32_t)(c1 & 0x07) << 18) | ((u_int32_t)(c2 & 0x3F) << 12) | ((u_int32_t)(c3 & 0x3F) << 6) | (u_int32_t)(c4 & 0x3F);
+            unsigned int codepoint = ((unsigned int)(c1 & 0x07) << 18) | ((unsigned int)(c2 & 0x3F) << 12) | ((unsigned int)(c3 & 0x3F) << 6) | (u_int32_t)(c4 & 0x3F);
             _cp_base64_encode_unicode(buf, offset, &index, codepoint);
             i += 3;
         } else {
