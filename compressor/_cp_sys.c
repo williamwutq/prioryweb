@@ -359,6 +359,32 @@ size_t _cp_buffer_to_lowercase(_cp_Buffer* buf) {
     return changed;
 }
 
+size_t _cp_buffer_pad_zeros(_cp_Buffer* buf) {
+    if (buf == NULL || buf->capacity == 0) return 0;
+    size_t i = buf->capacity;
+    byte* p = buf->data;
+    while (i > 0) {
+        byte c = p[i - 1];
+        if (c != 0xFF) break;
+        p[i - 1] &= 0;
+        i--;
+    }
+    return i;
+}
+
+size_t _cp_buffer_pad_ones(_cp_Buffer* buf) {
+    if (buf == NULL || buf->capacity == 0) return 0;
+    size_t i = buf->capacity;
+    byte* p = buf->data;
+    while (i > 0) {
+        byte c = p[i - 1];
+        if (c != 0) break;
+        p[i - 1] |= 0xFF;
+        i--;
+    }
+    return i;
+}
+
 _cp_Buffer* _cp_buffer_concat(const _cp_Buffer* buf1, const _cp_Buffer* buf2) {
     if (buf1 == NULL || buf2 == NULL) return NULL;
     _cp_Buffer* bufn = _cp_buffer_create();
@@ -401,6 +427,17 @@ void _cp_buffer_print_detail(const _cp_Buffer* buf) {
     printf("Buffer size: %zu, capacity: %zu\n", buf->size, buf->capacity);
     printf("Buffer data (hex): ");
     for (size_t i = 0; i < buf->size; i++) {
+        printf("%02X ", buf->data[i]);
+    }
+    printf("\n");
+}
+
+void _cp_buffer_print_all(const _cp_Buffer* buf) {
+    if (buf == NULL) {
+        printf("(null)\n");
+        return;
+    }
+    for (size_t i = 0; i < buf->capacity; i++) {
         printf("%02X ", buf->data[i]);
     }
     printf("\n");

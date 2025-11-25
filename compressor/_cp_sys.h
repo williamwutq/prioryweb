@@ -510,6 +510,24 @@ _cp_Buffer* _cp_buffer_from_cstr_inplace(const char* str);
  */
 size_t _cp_buffer_to_lowercase(_cp_Buffer* buf);
 /**
+ * Assume that the buffer is padded with ones at the end, this function changes
+ * all trailing ones to zeros until a zero is encountered or the buffer is empty.
+ * 
+ * By definition, the null terminator is included in the padding.
+ * @param buf The buffer to pad.
+ * @return The size of the buffer, excluding the null terminator.
+ */
+size_t _cp_buffer_pad_zeros(_cp_Buffer* buf);
+/**
+ * Assume that the buffer is padded with zeros at the end, this function changes
+ * all trailing zeros to ones until a one is encountered or the buffer is empty.
+ * 
+ * By definition, the buffer will not contain a null terminator after padding.
+ * @param buf The buffer to pad.
+ * @return The size of the buffer, excluding any terminator.
+ */
+size_t _cp_buffer_pad_ones(_cp_Buffer* buf);
+/**
  * Concatenates two buffers into a new buffer. Note that this function
  * performs memory copying. The original buffers remain unaffected.
  * @param buf1 The first buffer.
@@ -529,6 +547,13 @@ void _cp_buffer_print(const _cp_Buffer* buf);
  * @param buf The buffer to print details of.
  */
 void _cp_buffer_print_detail(const _cp_Buffer* buf);
+/**
+ * Prints all characters in the buffer to stdout, including non-printable characters.
+ * This may include zeros and garbage data after the null terminator and beyound the size of the buffer.
+ * If the buffer is NULL, prints nothing.
+ * @param buf The buffer to print all characters from.
+ */
+void _cp_buffer_print_all(const _cp_Buffer* buf);
 /**
  * Prints the binary representation of the buffer's data to stdout.
  * If the buffer is NULL, prints nothing.
