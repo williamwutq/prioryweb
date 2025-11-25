@@ -65,6 +65,18 @@ void _cp_assertmem(const void* ptr) {
     }
 }
 
+void _cp_assert(const bool condition, const char* msg) {
+    if (!condition) {
+        _cp_die(msg);
+    }
+}
+
+void _cp_expect(const void* ptr1, const void* ptr2, size_t size, const char* msg) {
+    if (memcmp(ptr1, ptr2, size) != 0) {
+        _cp_die(msg);
+    }
+}
+
 // Memory buffer
 
 _cp_Buffer** buffers = NULL;
@@ -393,4 +405,23 @@ compare_t _cp_buffer_bufcomp(const _cp_Buffer* buf1, const _cp_Buffer* buf2, siz
         if (avail1 > avail2) return inf_larger;
     }
     return equal;
+}
+
+void _cp_buffer_expectequal(const _cp_Buffer* buf1, const _cp_Buffer* buf2, const char* msg) {
+    size_t min_size = min(buf1->size, buf2->size);
+    if (_cp_buffer_bufcomp(buf1, buf2, 0, 0, min_size) != equal) {
+        _cp_die(msg);
+    }
+}
+
+void _cp_buffer_expectsize(const _cp_Buffer* buf, const size_t size, const char* msg) {
+    if (buf->size != size) {
+        _cp_die(msg);
+    }
+}
+
+void _cp_buffer_expectcap(const _cp_Buffer* buf, const size_t capacity, const char* msg) {
+    if (buf->capacity != capacity) {
+        _cp_die(msg);
+    }
 }

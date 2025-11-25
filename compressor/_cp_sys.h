@@ -136,6 +136,27 @@ extern const compare_t equal;
 extern const compare_t undefined;
 
 /**
+ * Asserts that a condition is true.
+ * If the condition is false, it outputs a fatal error message and exits the program.
+ * @param condition The condition to check.
+ * @param msg The error message to display if the assertion fails.
+ */
+void _cp_assert(const bool condition, const char* msg);
+/**
+ * Expects the contents of two pointers to be equal.
+ * If they are not equal, it outputs a fatal error message and exits the program.
+ * This compares the full contents of the memory locations pointed to by the pointers.
+ * 
+ * Note: This function may crush the program due to memory access violation if the pointers are invalid.
+ * 
+ * @param ptr1 The first pointer to compare.
+ * @param ptr2 The second pointer to compare.
+ * @param size The size of the memory to compare in bytes.
+ * @param msg The error message to display if the expectation fails.
+ */
+void _cp_expect(const void* ptr1, const void* ptr2, size_t size, const char* msg);
+
+/**
  * Checks if the comparison result indicates that the first value is larger than the second.
  * This includes both 'larger' and 'infinitely larger' results.
  * @param cmp The comparison result to check.
@@ -304,6 +325,35 @@ typedef struct {
         .capacity = (bufptr)->capacity \
     })
 
+/**
+ * Asserts that two buffers are equal in content.
+ * If they are not equal, it outputs a fatal error message and exits the program.
+ * This compares the full contents of the two buffers.
+ * @param buf1 The first buffer to compare.
+ * @param buf2 The second buffer to compare.
+ * @param msg The error message to display if the expectation fails.
+ */
+void _cp_buffer_expectequal(const _cp_Buffer* buf1, const _cp_Buffer* buf2, const char* msg);
+/**
+ * Asserts that the buffer has the expected size.
+ * If the buffer's size does not match the expected size, it outputs a fatal error message and exits the program.
+ * 
+ * Do not confuse this function with _cp_buffer_expectcap(), which checks for capacity instead of size.
+ * @param buf The buffer to check.
+ * @param size The expected size of the buffer.
+ * @param msg The error message to display if the expectation fails.
+ */
+void _cp_buffer_expectsize(const _cp_Buffer* buf, const size_t size, const char* msg);
+/**
+ * Asserts that the buffer has the expected capacity.
+ * If the buffer's capacity does not match the expected capacity, it outputs a fatal error message and exits the program.
+ * 
+ * Do not confuse this function with _cp_buffer_expectsize(), which checks for size instead of capacity.
+ * @param buf The buffer to check.
+ * @param capacity The expected capacity of the buffer.
+ * @param msg The error message to display if the expectation fails.
+ */
+void _cp_buffer_expectcap(const _cp_Buffer* buf, const size_t capacity, const char* msg);
 /**
  * Initializes the buffer pool.
  * This function allocates memory for a pool of reusable buffers.
