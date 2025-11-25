@@ -355,6 +355,28 @@ void _cp_buffer_expectsize(const _cp_Buffer* buf, const size_t size, const char*
  */
 void _cp_buffer_expectcap(const _cp_Buffer* buf, const size_t capacity, const char* msg);
 /**
+ * Outputs a fatal error message to stderr and exits the program.
+ * @param msg The error message to display stored in a null-terminated _cp_Buffer.
+ * @return Never returns; exits the program.
+ */
+void _cp_dieb(const _cp_Buffer* msg);
+/**
+ * Outputs a fatal error message to stderr and exits the program.
+ * @param msg The error message to display stored in a null-terminated _cp_Buffer.
+ * @return Never returns; exits the program.
+ */
+void _cp_warnb(const _cp_Buffer* msg);
+/**
+ * Outputs an informational message to stdout.
+ * @param msg The informational message to display stored in a null-terminated _cp_Buffer.
+ */
+void _cp_infob(const _cp_Buffer* msg);
+/**
+ * Outputs a debug message to stdout.
+ * @param msg The debug message to display stored in a null-terminated _cp_Buffer.
+ */
+void _cp_debugb(const _cp_Buffer* msg);
+/**
  * Initializes the buffer pool.
  * This function allocates memory for a pool of reusable buffers.
  */

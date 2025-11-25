@@ -47,7 +47,6 @@ void _cp_info(const char* msg) {
 }
 
 void _cp_debug(const char* msg) {
-    // Uncomment the next line to enable debug messages
     if (DEBUG) {
         fprintf(stdout, "Debug: %s\n", msg);
     }
@@ -82,6 +81,46 @@ void _cp_expect(const void* ptr1, const void* ptr2, size_t size, const char* msg
 _cp_Buffer** buffers = NULL;
 size_t buffer_count = 0;
 size_t POOL_SIZE = 1024;
+
+void _cp_dieb(const _cp_Buffer* msg) {
+    if (msg == NULL || msg->data == NULL) {
+        _cp_die("Fatal error: (null)");
+    } else {
+        printf("Fatal error: ");
+        _cp_buffer_print(msg);
+        _cp_clean();
+        exit(EXIT_FAILURE);
+    }
+}
+
+void _cp_warnb(const _cp_Buffer* msg) {
+    if (msg == NULL || msg->data == NULL) {
+        fprintf(stderr, "Warning: (null)\n");
+    } else {
+        fprintf(stderr, "Warning: ");
+        _cp_buffer_print(msg);
+    }
+}
+
+void _cp_infob(const _cp_Buffer* msg) {
+    if (msg == NULL || msg->data == NULL) {
+        fprintf(stdout, "Info: (null)\n");
+    } else {
+        fprintf(stdout, "Info: ");
+        _cp_buffer_print(msg);
+    }
+}
+
+void _cp_debugb(const _cp_Buffer* msg) {
+    if (DEBUG) {
+        if (msg == NULL || msg->data == NULL) {
+            fprintf(stdout, "Debug: (null)\n");
+        } else {
+            fprintf(stdout, "Debug: ");
+            _cp_buffer_print(msg);
+        }
+    }
+}
 
 void _cp_init_buffer_pool() {
     buffers = (_cp_Buffer**)malloc(sizeof(_cp_Buffer*) * POOL_SIZE);
