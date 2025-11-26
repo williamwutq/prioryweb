@@ -85,7 +85,7 @@ static const char decode_table_escape[64] = {
     '!', '@', '#', '$', '+', '=', '*', '&',
     '%', '^', '(', ')', '[', ']', '{', '}',
     '<', '>', '\a','\b',0xA9, -15,'\e','\f',
-    -16, 0xD7,0xF7,-10, -11, -12, -6,'\n',
+    0xF7, 0xD7,-16,-10, -11, -12, -6,'\n',
     -13, 0xA0, 0xAE,'\r',' ', '\t',-5,'\v',
     -14, -2, -3, -4, '\\', '|', '~', '`',
     '"', '\'',-24, -25, -26, -27, -28, 0
@@ -96,7 +96,7 @@ static const char decode_table_escape[64] = {
     // -4 -> &emsp;
     // A9 -> &copy;
     // AE -> &reg;
-    // -5 -> &trade;
+    // -5 -> unicode
     // F7 -> &div;
     // -6 -> &#10003; (check mark)
     // -10 -> &laquo;
@@ -104,8 +104,8 @@ static const char decode_table_escape[64] = {
     // -12 -> &bull;
     // -13 -> &hellip;
     // -14 -> &mdash;
-    // -15 -> &deg;
-    // -16 -> &plusmn;
+    // -15 -> double sequence
+    // -16 -> integer sequence
     // -24 -> &larr;
     // -25 -> &uarr;
     // -26 -> &rarr;
@@ -121,17 +121,23 @@ void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* ind
         _cp_base64_write_6_bits(buf, offset, (*index)++, 41);
     } if (codepoint <= 0x7F) {
         // 1-byte UTF-8 -> 2 6-bit values
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 46);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 2);
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0xC0 | ((codepoint >> 6) & 0x1F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | (codepoint & 0x3F)));
     } else if (codepoint <= 0x7FF) {
         // 2-byte UTF-8 -> 3 6-bit values
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 46);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 3);
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0xE0 | ((codepoint >> 12) & 0x0F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 6) & 0x3F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | (codepoint & 0x3F)));
     } else if (codepoint <= 0xFFFF) {
         // 3-byte UTF-8 -> 4 6-bit values
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 46);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 4);
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0xF0 | ((codepoint >> 18) & 0x07)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 12) & 0x3F)));
@@ -139,6 +145,8 @@ void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* ind
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | (codepoint & 0x3F)));
     } else if (codepoint <= 0x10FFFF) {
         // 4-byte UTF-8 -> 5 6-bit values
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 46);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 5);
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0xF8 | ((codepoint >> 24) & 0x03)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 18) & 0x3F)));
@@ -308,9 +316,64 @@ void _cp_base64_decode(const _cp_Buffer* buf, const size_t offset, _cp_Buffer* o
     bool in_escape = false;
     for (size_t index = 0; in_escape != 8 && index * 6 / 8 + offset < buf->size; index++) {
         byte value = _cp_base64_read_6_bits(buf, offset, index);
-        printf("Read 6 bits: %u\n at index %zu\n", value, index);
         if (in_escape == 2) {
             // Handle unicode
+            size_t unicode_length = value;
+            unsigned int codepoint = 0;
+            for (size_t u = 0; u < unicode_length; u++) {
+                byte b = _cp_base64_read_6_bits(buf, offset, ++index);
+                codepoint = (codepoint << 6) | (b & 0x3F);
+            }
+            // Append UTF-8 encoded codepoint to output buffer
+            if (codepoint <= 0x7F) {
+                _cp_buffer_append_char(out, (char)codepoint);
+            } else if (codepoint <= 0x7FF) {
+                _cp_buffer_append_char(out, (char)(0xC0 | ((codepoint >> 6) & 0x1F)));
+                _cp_buffer_append_char(out, (char)(0x80 | (codepoint & 0x3F)));
+            } else if (codepoint <= 0xFFFF) {
+                _cp_buffer_append_char(out, (char)(0xE0 | ((codepoint >> 12) & 0x0F)));
+                _cp_buffer_append_char(out, (char)(0x80 | ((codepoint >> 6) & 0x3F)));
+                _cp_buffer_append_char(out, (char)(0x80 | (codepoint & 0x3F)));
+            } else if (codepoint <= 0x10FFFF) {
+                _cp_buffer_append_char(out, (char)(0xF0 | ((codepoint >> 18) & 0x07)));
+                _cp_buffer_append_char(out, (char)(0x80 | ((codepoint >> 12) & 0x3F)));
+                _cp_buffer_append_char(out, (char)(0x80 | ((codepoint >> 6) & 0x3F)));
+                _cp_buffer_append_char(out, (char)(0x80 | (codepoint & 0x3F)));
+            }
+            in_escape = false; // Exit unicode mode
+        } else if (in_escape == 3) {
+            // Integer escape
+            unsigned long long int_value = 0; // u64
+            // Read 11 6-bit values
+            for (size_t j = 0; j < 11; j++) {
+                byte b = _cp_base64_read_6_bits(buf, offset, ++index);
+                int_value = (int_value << 6) | (b & 0x3F);
+            }
+            // Append integer as string
+            char int_str[21]; // Max length for 64-bit unsigned int
+            snprintf(int_str, sizeof(int_str), "%llu", int_value);
+            for (size_t k = 0; int_str[k] != '\0'; k++) {
+                _cp_buffer_append_char(out, int_str[k]);
+            }
+            in_escape = false; // Exit integer mode
+        } else if (in_escape == 4) {
+            // Double escape
+            unsigned long long double_bits = 0; // u64
+            // Read 11 6-bit values
+            for (size_t j = 0; j < 11; j++) {
+                byte b = _cp_base64_read_6_bits(buf, offset, ++index);
+                double_bits = (double_bits << 6) | (b & 0x3F);
+            }
+            // Reinterpret bits as double
+            double double_value;
+            memcpy(&double_value, &double_bits, sizeof(double));
+            // Append double as string
+            char double_str[32]; // Sufficient for double representation
+            snprintf(double_str, sizeof(double_str), "%.17g", double_value);
+            for (size_t k = 0; double_str[k] != '\0'; k++) {
+                _cp_buffer_append_char(out, double_str[k]);
+            }
+            in_escape = false; // Exit double mode
         } else if (in_escape) {
             // Look up escape table
             char decoded = decode_table_escape[value];
@@ -332,10 +395,8 @@ void _cp_base64_decode(const _cp_Buffer* buf, const size_t offset, _cp_Buffer* o
                         _cp_buffer_append_char(out, '\x80');
                         _cp_buffer_append_char(out, '\x83');
                         break;
-                    case -5: // &trade;
-                        _cp_buffer_append_char(out, '\xE2');
-                        _cp_buffer_append_char(out, '\x84');
-                        _cp_buffer_append_char(out, '\xA2');
+                    case -5: // start of unicode sequence
+                        in_escape = 2; // Indicate unicode sequence
                         break;
                     case -6: // &#10003; (check mark)
                         _cp_buffer_append_char(out, '\xE2');
@@ -365,13 +426,11 @@ void _cp_base64_decode(const _cp_Buffer* buf, const size_t offset, _cp_Buffer* o
                         _cp_buffer_append_char(out, '\x80');
                         _cp_buffer_append_char(out, '\x94');
                         break;
-                    case -15: // &deg;
-                        _cp_buffer_append_char(out, '\xC2');
-                        _cp_buffer_append_char(out, '\xB0');
+                    case -15:
+                        in_escape = 4; // Indicate double sequence
                         break;
-                    case -16: // &plusmn;
-                        _cp_buffer_append_char(out, '\xC2');
-                        _cp_buffer_append_char(out, '\xB1');
+                    case -16:
+                        in_escape = 3; // Indicate integer sequence
                         break;
                     case -24: // &larr;
                         _cp_buffer_append_char(out, '\xE2');
@@ -403,10 +462,13 @@ void _cp_base64_decode(const _cp_Buffer* buf, const size_t offset, _cp_Buffer* o
                 }
             } else if (decoded == 63) {
                 in_escape = 8; // Null terminator, end decoding
+            } else {
+                _cp_buffer_append_char(out, decoded);
+                in_escape = false; // Exit escape mode
             }
         } else {
             char decoded = decode_table_normal[value];
-            if (decoded == 63) { // Escape character
+            if (value == 63) { // Escape character
                 in_escape = 1; // Enter escape mode
             } else {
                 _cp_buffer_append_char(out, decoded);
