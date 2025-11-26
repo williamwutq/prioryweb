@@ -10,6 +10,11 @@ IMPLS = _cp_*.c     # Implementation files
 OBJS = _cp_*.o      # Object files
 LIB = libcplib.a    # Static library
 
+ct: libs run # Compile and run tests
+
+run: test    # Run the test program
+	./test
+
 test: test.o $(LIB) # Default target
 	$(CC) $(CFLAGS) -o test test.o $(LIB)
 
