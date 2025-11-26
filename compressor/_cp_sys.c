@@ -6,7 +6,7 @@
 typedef unsigned char byte;
 const uint16_t BLOCK_SIZE = 256;
 const uint16_t DEFAULT_SIZE = 256 * 16;
-const int DEBUG = 1;// Set to 1 to enable debug messages
+#define DEBUG 1 // Set to 1 to enable debug messages
 const bool false = 0;
 const bool true = 1;
 const compare_t inf_larger = 2;
@@ -47,10 +47,9 @@ void _cp_info(const char* msg) {
 }
 
 void _cp_debug(const char* msg) {
-    // Uncomment the next line to enable debug messages
-    if (DEBUG) {
-        fprintf(stdout, "Debug: %s\n", msg);
-    }
+#if DEBUG
+    fprintf(stdout, "Debug: %s\n", msg);
+#endif
 }
 
 void _cp_finish() {
@@ -65,11 +64,63 @@ void _cp_assertmem(const void* ptr) {
     }
 }
 
+void _cp_assert(const bool condition, const char* msg) {
+    if (!condition) {
+        _cp_die(msg);
+    }
+}
+
+void _cp_expect(const void* ptr1, const void* ptr2, size_t size, const char* msg) {
+    if (memcmp(ptr1, ptr2, size) != 0) {
+        _cp_die(msg);
+    }
+}
+
 // Memory buffer
 
 _cp_Buffer** buffers = NULL;
 size_t buffer_count = 0;
 size_t POOL_SIZE = 1024;
+
+void _cp_dieb(const _cp_Buffer* msg) {
+    if (msg == NULL || msg->data == NULL) {
+        _cp_die("Fatal error: (null)");
+    } else {
+        printf("Fatal error: ");
+        _cp_buffer_print(msg);
+        _cp_clean();
+        exit(EXIT_FAILURE);
+    }
+}
+
+void _cp_warnb(const _cp_Buffer* msg) {
+    if (msg == NULL || msg->data == NULL) {
+        fprintf(stderr, "Warning: (null)\n");
+    } else {
+        fprintf(stderr, "Warning: ");
+        _cp_buffer_print(msg);
+    }
+}
+
+void _cp_infob(const _cp_Buffer* msg) {
+    if (msg == NULL || msg->data == NULL) {
+        fprintf(stdout, "Info: (null)\n");
+    } else {
+        fprintf(stdout, "Info: ");
+        _cp_buffer_print(msg);
+    }
+}
+
+void _cp_debugb(const _cp_Buffer* msg) {
+#if DEBUG
+    if (msg == NULL || msg->data == NULL) {
+        fprintf(stdout, "Debug: (null)\n");
+    } else {
+        fprintf(stdout, "Debug: ");
+        _cp_buffer_print(msg);
+    }
+#endif
+}
 
 void _cp_init_buffer_pool() {
     buffers = (_cp_Buffer**)malloc(sizeof(_cp_Buffer*) * POOL_SIZE);
@@ -308,6 +359,32 @@ size_t _cp_buffer_to_lowercase(_cp_Buffer* buf) {
     return changed;
 }
 
+size_t _cp_buffer_pad_zeros(_cp_Buffer* buf) {
+    if (buf == NULL || buf->capacity == 0) return 0;
+    size_t i = buf->capacity;
+    byte* p = buf->data;
+    while (i > 0) {
+        byte c = p[i - 1];
+        if (c != 0xFF) break;
+        p[i - 1] &= 0;
+        i--;
+    }
+    return i;
+}
+
+size_t _cp_buffer_pad_ones(_cp_Buffer* buf) {
+    if (buf == NULL || buf->capacity == 0) return 0;
+    size_t i = buf->capacity;
+    byte* p = buf->data;
+    while (i > 0) {
+        byte c = p[i - 1];
+        if (c != 0) break;
+        p[i - 1] |= 0xFF;
+        i--;
+    }
+    return i;
+}
+
 _cp_Buffer* _cp_buffer_concat(const _cp_Buffer* buf1, const _cp_Buffer* buf2) {
     if (buf1 == NULL || buf2 == NULL) return NULL;
     _cp_Buffer* bufn = _cp_buffer_create();
@@ -355,6 +432,17 @@ void _cp_buffer_print_detail(const _cp_Buffer* buf) {
     printf("\n");
 }
 
+void _cp_buffer_print_all(const _cp_Buffer* buf) {
+    if (buf == NULL) {
+        printf("(null)\n");
+        return;
+    }
+    for (size_t i = 0; i < buf->capacity; i++) {
+        printf("%02X ", buf->data[i]);
+    }
+    printf("\n");
+}
+
 void _cp_buffer_print_binary(const _cp_Buffer* buf, const unsigned char divide_each) {
     if (buf == NULL) {
         return;
@@ -393,4 +481,23 @@ compare_t _cp_buffer_bufcomp(const _cp_Buffer* buf1, const _cp_Buffer* buf2, siz
         if (avail1 > avail2) return inf_larger;
     }
     return equal;
+}
+
+void _cp_buffer_expectequal(const _cp_Buffer* buf1, const _cp_Buffer* buf2, const char* msg) {
+    size_t min_size = min(buf1->size, buf2->size);
+    if (_cp_buffer_bufcomp(buf1, buf2, 0, 0, min_size) != equal) {
+        _cp_die(msg);
+    }
+}
+
+void _cp_buffer_expectsize(const _cp_Buffer* buf, const size_t size, const char* msg) {
+    if (buf->size != size) {
+        _cp_die(msg);
+    }
+}
+
+void _cp_buffer_expectcap(const _cp_Buffer* buf, const size_t capacity, const char* msg) {
+    if (buf->capacity != capacity) {
+        _cp_die(msg);
+    }
 }

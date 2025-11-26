@@ -136,6 +136,27 @@ extern const compare_t equal;
 extern const compare_t undefined;
 
 /**
+ * Asserts that a condition is true.
+ * If the condition is false, it outputs a fatal error message and exits the program.
+ * @param condition The condition to check.
+ * @param msg The error message to display if the assertion fails.
+ */
+void _cp_assert(const bool condition, const char* msg);
+/**
+ * Expects the contents of two pointers to be equal.
+ * If they are not equal, it outputs a fatal error message and exits the program.
+ * This compares the full contents of the memory locations pointed to by the pointers.
+ * 
+ * Note: This function may crush the program due to memory access violation if the pointers are invalid.
+ * 
+ * @param ptr1 The first pointer to compare.
+ * @param ptr2 The second pointer to compare.
+ * @param size The size of the memory to compare in bytes.
+ * @param msg The error message to display if the expectation fails.
+ */
+void _cp_expect(const void* ptr1, const void* ptr2, size_t size, const char* msg);
+
+/**
  * Checks if the comparison result indicates that the first value is larger than the second.
  * This includes both 'larger' and 'infinitely larger' results.
  * @param cmp The comparison result to check.
@@ -305,6 +326,57 @@ typedef struct {
     })
 
 /**
+ * Asserts that two buffers are equal in content.
+ * If they are not equal, it outputs a fatal error message and exits the program.
+ * This compares the full contents of the two buffers.
+ * @param buf1 The first buffer to compare.
+ * @param buf2 The second buffer to compare.
+ * @param msg The error message to display if the expectation fails.
+ */
+void _cp_buffer_expectequal(const _cp_Buffer* buf1, const _cp_Buffer* buf2, const char* msg);
+/**
+ * Asserts that the buffer has the expected size.
+ * If the buffer's size does not match the expected size, it outputs a fatal error message and exits the program.
+ * 
+ * Do not confuse this function with _cp_buffer_expectcap(), which checks for capacity instead of size.
+ * @param buf The buffer to check.
+ * @param size The expected size of the buffer.
+ * @param msg The error message to display if the expectation fails.
+ */
+void _cp_buffer_expectsize(const _cp_Buffer* buf, const size_t size, const char* msg);
+/**
+ * Asserts that the buffer has the expected capacity.
+ * If the buffer's capacity does not match the expected capacity, it outputs a fatal error message and exits the program.
+ * 
+ * Do not confuse this function with _cp_buffer_expectsize(), which checks for size instead of capacity.
+ * @param buf The buffer to check.
+ * @param capacity The expected capacity of the buffer.
+ * @param msg The error message to display if the expectation fails.
+ */
+void _cp_buffer_expectcap(const _cp_Buffer* buf, const size_t capacity, const char* msg);
+/**
+ * Outputs a fatal error message to stderr and exits the program.
+ * @param msg The error message to display stored in a null-terminated _cp_Buffer.
+ * @return Never returns; exits the program.
+ */
+void _cp_dieb(const _cp_Buffer* msg);
+/**
+ * Outputs a fatal error message to stderr and exits the program.
+ * @param msg The error message to display stored in a null-terminated _cp_Buffer.
+ * @return Never returns; exits the program.
+ */
+void _cp_warnb(const _cp_Buffer* msg);
+/**
+ * Outputs an informational message to stdout.
+ * @param msg The informational message to display stored in a null-terminated _cp_Buffer.
+ */
+void _cp_infob(const _cp_Buffer* msg);
+/**
+ * Outputs a debug message to stdout.
+ * @param msg The debug message to display stored in a null-terminated _cp_Buffer.
+ */
+void _cp_debugb(const _cp_Buffer* msg);
+/**
  * Initializes the buffer pool.
  * This function allocates memory for a pool of reusable buffers.
  */
@@ -438,6 +510,24 @@ _cp_Buffer* _cp_buffer_from_cstr_inplace(const char* str);
  */
 size_t _cp_buffer_to_lowercase(_cp_Buffer* buf);
 /**
+ * Assume that the buffer is padded with ones at the end, this function changes
+ * all trailing ones to zeros until a zero is encountered or the buffer is empty.
+ * 
+ * By definition, the null terminator is included in the padding.
+ * @param buf The buffer to pad.
+ * @return The size of the buffer, excluding the null terminator.
+ */
+size_t _cp_buffer_pad_zeros(_cp_Buffer* buf);
+/**
+ * Assume that the buffer is padded with zeros at the end, this function changes
+ * all trailing zeros to ones until a one is encountered or the buffer is empty.
+ * 
+ * By definition, the buffer will not contain a null terminator after padding.
+ * @param buf The buffer to pad.
+ * @return The size of the buffer, excluding any terminator.
+ */
+size_t _cp_buffer_pad_ones(_cp_Buffer* buf);
+/**
  * Concatenates two buffers into a new buffer. Note that this function
  * performs memory copying. The original buffers remain unaffected.
  * @param buf1 The first buffer.
@@ -457,6 +547,13 @@ void _cp_buffer_print(const _cp_Buffer* buf);
  * @param buf The buffer to print details of.
  */
 void _cp_buffer_print_detail(const _cp_Buffer* buf);
+/**
+ * Prints all characters in the buffer to stdout, including non-printable characters.
+ * This may include zeros and garbage data after the null terminator and beyound the size of the buffer.
+ * If the buffer is NULL, prints nothing.
+ * @param buf The buffer to print all characters from.
+ */
+void _cp_buffer_print_all(const _cp_Buffer* buf);
 /**
  * Prints the binary representation of the buffer's data to stdout.
  * If the buffer is NULL, prints nothing.

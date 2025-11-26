@@ -76,6 +76,12 @@ void _cp_write_buffer_to_stdout(const _cp_Buffer* buf);
  */
 void _cp_remove_null_terminator_if_exists(_cp_Buffer* buf);
 /**
+ * Removes all null terminators from the end of the buffer if they exist.
+ * If the buffer is empty or does not end with null terminators, no action is taken.
+ * @param buf The buffer to modify.
+ */
+void _cp_remove_null_terminators(_cp_Buffer* buf);
+/**
  * Adds a null terminator to the end of the buffer if it does not already exist.
  * Expands the buffer if necessary to accommodate the null terminator.
  * @param buf The buffer to modify.

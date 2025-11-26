@@ -199,13 +199,10 @@ Special escape sequence:
 
 - Special Code can be used indicate the start of a sequence. We have:
   - Unicode Sequence: escape + u, followed by the length of the unicode sequence in characters, followed by unicode data encoded in standard Base64 format. For example, the unicode string "你好" would be encoded as escape + u, length 8 (since each character is 3 bytes in UTF-8, summing to 48 bits or 8 Base64 characters), followed by the Base64 representation of the UTF-8 bytes.
-  - Raw ASCII Sequence: escape + a, followed by the length of the raw ASCII sequence in characters, followed by the raw ASCII data. For example, the raw ASCII string "<data>" would be encoded as escape + a, length 8 (since each character is 1 byte, summing to 6 bytes, or 48 bits, 8 Base64 characters), followed by the raw ASCII representation of the string. Generally, this is only useful for large amount of special characters.
-  - Binary Sequence: escape + b, followed by the length of the binary sequence in bytes, followed by the raw binary data. This is useful for embedding non-ASCII data within the compressed data.
   - Integer Sequence: escape + i, followed by the integer value encoded in standard Base64 format. This is useful for embedding numeric values directly within the compressed data. Since the integers used here are unsigned 64-bit integers, there should be 11 Base64 characters following the escape + i.
   - Double Precision Floating Point Sequence: escape + d, followed by the double value encoded in standard Base64 format. This is useful for embedding floating-point values directly within the compressed data. Since the doubles used here are IEEE 754 double-precision binary floating-point format: binary64, there should be 11 Base64 characters following the escape + d.
 
 - Functional Characters:
-  - Start of Sequence: escape + s (This is typically not needed)
   - Terminator: \\\\ (escape + escape) or \\e (escape + e)
   - Separator: escape + :
   - Assignment: :
@@ -220,28 +217,28 @@ To encode the ASCII string "value:Hello, World!", we would proceed as follows:
    - 'a' -> '0b011010' (26)
    - 'l' -> '0b100101' (37)
    - 'u' -> '0b101110' (46)
-   - 'e' -> '0b011100' (28)
+   - 'e' -> '0b011100' (30)
    - ':' -> '0b111110' (62)
    - 'H' -> '0b000111' (7)
-   - 'e' -> '0b011100' (28)
+   - 'e' -> '0b011100' (30)
    - 'l' -> '0b100101' (37)
    - 'l' -> '0b100101' (37)
-   - 'o' -> '0b100110' (38)
+   - 'o' -> '0b100110' (40)
    - ',' -> '0b111111' (escape) + '0b000001' (B)
-   - ' ' -> '0b111111' (escape) + '0b011100' (s)
-   - 'W' -> '0b001010' (48)
-   - 'o' -> '0b100110' (38)
-   - 'r' -> '0b101001' (41)
+   - ' ' -> '0b111111' (escape) + '0b101100' (s)
+   - 'W' -> '0b010110' (22)
+   - 'o' -> '0b100110' (40)
+   - 'r' -> '0b101011' (43)
    - 'l' -> '0b100101' (37)
-   - 'd' -> '0b100100' (36)
-   - '!' -> '0b111111' (escape) + '0b001001' (I)
+   - 'd' -> '0b011101' (29)
+   - '!' -> '0b111111' (escape) + '0b001000' (I)
    - terminator -> '0b111111' (escape) + '0b111111' (escape)
 2. Concatenate the 6-bit values to form a bitstream.
 In 6 bit groups, the bitstream would look like this:
-```101111 011010 100101 101110 011100 111110 000111 011100 100101 100101 100110 111111 000001 111111 011100 001010 100110 101001 100101 100100 111111 001001 111111 111111```
+```101111 011010 100101 101110 011110 111110 000111 011110 100101 100101 101000 111111 000001 111111 101100 010110 101000 101011 100101 011101 111111 001000 111111 111111```
 3. Finally, pack the bitstream into bytes for storage or transmission.
 In bytes, the packed data would be:
-```0b10111101 0b10101001 0b01101110 0b01110011 0b11100001 0b11011100 0b10010110 0b01011001 0b10111111 0b00000111 0b11110111 0b00001010 0b10011010 0b10011001 0b01100100 0b11111100 0b10011111 0b11111111```
+```0b10111101 0b10101001 0b01101110 0b01111011 0b11100001 0b11011110 0b10010110 0b01011010 0b00111111 0b00000111 0b11111011 0b00010110 0b10100010 0b10111001 0b01011101 0b11111100 0b10001111 0b11111111```
 
 ## Checksum Calculation
 The checksum is calculated using a simple XOR operation over all bytes in the compressed data (excluding the checksum byte itself). The resulting single byte is stored as the last byte of the compressed data.
