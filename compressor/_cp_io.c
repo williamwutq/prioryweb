@@ -102,6 +102,15 @@ void _cp_remove_null_terminator_if_exists(_cp_Buffer* buf) {
     }
 }
 
+void _cp_remove_null_terminators(_cp_Buffer* buf) {
+    if (buf == NULL || buf->size == 0) {
+        return;
+    }
+    while (buf->size > 0 && buf->data[buf->size - 1] == '\0') {
+        buf->size--;
+    }
+}
+
 void _cp_add_null_terminator_if_not_exists(_cp_Buffer* buf) {
     if (buf == NULL) {
         return;
