@@ -119,19 +119,22 @@ void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* ind
         // &nbsp; -> escape + p
         _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 41);
+    } else if (codepoint == 0xF8) {
+        // assignment operator -> 62
+        _cp_base64_write_6_bits(buf, offset, (*index)++, 62);
     } if (codepoint <= 0x7F) {
         // 1-byte UTF-8 -> 2 6-bit values
         _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 46);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 2);
-        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0xC0 | ((codepoint >> 6) & 0x1F)));
+        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 6) & 0x1F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | (codepoint & 0x3F)));
     } else if (codepoint <= 0x7FF) {
         // 2-byte UTF-8 -> 3 6-bit values
         _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 46);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 3);
-        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0xE0 | ((codepoint >> 12) & 0x0F)));
+        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 12) & 0x0F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 6) & 0x3F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | (codepoint & 0x3F)));
     } else if (codepoint <= 0xFFFF) {
@@ -139,7 +142,7 @@ void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* ind
         _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 46);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 4);
-        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0xF0 | ((codepoint >> 18) & 0x07)));
+        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 18) & 0x0F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 12) & 0x3F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 6) & 0x3F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | (codepoint & 0x3F)));
@@ -148,7 +151,7 @@ void _cp_base64_encode_unicode(_cp_Buffer* buf, const size_t offset, size_t* ind
         _cp_base64_write_6_bits(buf, offset, (*index)++, 63);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 46);
         _cp_base64_write_6_bits(buf, offset, (*index)++, 5);
-        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0xF8 | ((codepoint >> 24) & 0x03)));
+        _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 24) & 0x07)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 18) & 0x3F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 12) & 0x3F)));
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(0x80 | ((codepoint >> 6) & 0x3F)));
@@ -166,9 +169,6 @@ void _cp_base64_encode_ascii(_cp_Buffer* buf, const size_t offset, size_t* index
     } else if (code >= '0' && code <= '9') {
         // 0-9 -> 52-61
         _cp_base64_write_6_bits(buf, offset, (*index)++, (byte)(code + 4));
-    } else if (code == ':') {
-        // : -> 62
-        _cp_base64_write_6_bits(buf, offset, (*index)++, 62);
     } else {
         byte c;
         switch (code) {
