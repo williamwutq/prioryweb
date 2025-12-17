@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
             You may not process data files that include compressed tag portion using this program.");
     if (argc < 2) {
         printf("Usage: cp32de <input_file> <output_file>\n");
-        _cp_info("This program deencodes a single input .tgvz (Compressed Tag Vector) \
+        _cp_info("This program decodes a single input .tgvz (Compressed Tag Vector) \
              into a decoded output .tgss (Storage Tag Source) \
              file using the custom base32 encoding.");
         _cp_finish();
