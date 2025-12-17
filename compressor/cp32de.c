@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     }
     if (argc != 3) {
         _cp_die("Invalid number of arguments. Please provide exactly one input file and one output file.\
-            User single quotes ('') for paths with spaces.");
+            Use single quotes ('') for paths with spaces.");
     }
     char* last = argv[2];
     // Check last is not empty
