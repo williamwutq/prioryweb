@@ -18,6 +18,9 @@ run: test    # Run the test program
 test: test.o $(LIB) # Default target
 	$(CC) $(CFLAGS) -o test test.o $(LIB)
 
+cpobjen: cpobjen.o $(LIB) # Object encoder program
+	$(CC) $(CFLAGS) -o cpobjen cpobjen.o $(LIB)
+
 cp32en: cp32en.o $(LIB) # 32-bit encoder program
 	$(CC) $(CFLAGS) -o cp32en cp32en.o $(LIB)
 
