@@ -1,0 +1,121 @@
+#filetype General
+#version 1.0
+#set simple public local static nocache trusted
+#key simple|tag|easy|catagory|sample|example|test|demo|basic|search|thing|data|tgss|storage|code|encoding|raw|tgvz|man|doc|trust|document|storage|comma|format|design|system|serial|strict|lose
+#obj
+#name tgss.man
+#title Man Page for TGSS
+#data
+% TGSS(5) Tag Storage System Format
+% Author William Wu
+% January 2025
+
+# NAME
+
+tgss - Storage Tag Source format specification
+
+# SYNOPSIS
+
+A comma-separated, non-space serialization format for tag storage. Provides two parsing modes: **strict** and **loose**.
+
+# DESCRIPTION
+
+The **.tgss** (Storage Tag Source) format stores tag-like elements in a single comma-delimited string. Commas inside elements are escaped by doubling them (`,,`). Order of elements does not matter.
+
+Two parsing modes exist:
+
+---
+
+# STRICT MODE
+
+Strict mode enforces rigid, deterministic structure suitable for machines or canonicalization.
+
+## Rules
+
+* **Comma-separated list.** Elements are delimited by unescaped commas.
+* **Comma escaping.** Literal commas inside elements are represented by `,,`.
+* **Spaces are literal.** No trimming occurs; spaces are part of the element.
+* **No empty elements.** Sequences like `,,element` or `element,,` that produce empty entries are invalid.
+* **No duplicates.** Each element must be unique.
+* **Lowercase only.** A–Z is invalid.
+* **No Unicode.** Only ASCII characters allowed.
+* **Element cannot start with a comma.** A leading `,,` is interpreted as *the previous element containing a trailing literal comma*. Therefore an element starting with an escaped comma is disallowed.
+
+## Examples
+
+* `element!, spaced ,comma,,,format,tgss,tags`
+
+  * **Valid** in strict mode.
+  * Contains the literal element `spaced` (with spaces).
+
+* `,element1,element`
+
+  * **Invalid** in strict mode: produces an empty leading element.
+
+* `element,element`
+
+  * **Invalid**: duplicate elements.
+
+* `ELEMENT!`
+
+  * **Invalid**: contains uppercase letters.
+
+---
+
+# LOOSE MODE
+
+Loose mode is user-friendly and designed for human input.
+
+## Rules
+
+* **Spaces ignored.** Each element is trimmed; leading and trailing spaces are removed.
+* **Comma escaping identical to strict mode:** `,,` represents a literal comma.
+* **Empty elements allowed.** Multiple commas may produce empty entries.
+* **Duplicates allowed.**
+* **Case-insensitive.** Input may contain uppercase; comparison is case-insensitive.
+* **Unicode allowed.**
+
+## Examples
+
+* `element!, spaced ,comma,,,format,tgss,tags`
+
+  * **Valid** in loose mode; element becomes `spaced` (trimmed).
+
+* `,element1,element`
+
+  * **Valid**: contains an empty leading element.
+
+* `element,element`
+
+  * **Valid**: duplicates allowed.
+
+* `ELEMENT!`
+
+  * **Valid**: uppercase permitted.
+
+---
+
+# ESCAPING
+
+Literal commas inside an element must be represented as:
+
+```
+,,
+```
+
+Two consecutive commas represent one literal comma. Three consecutive commas (`,,,`) represent: one literal comma plus a separator.
+
+General Rule is that even number of consecutive commas are all escaped comma literals, while when odd number of consecutive commas are encountered, the last commas is the separator.
+
+# NOTES
+
+* Order of elements has no semantic meaning.
+* Escaping rules are identical across strict and loose modes.
+
+# SEE ALSO
+
+csv(5), tags(7)
+
+# AUTHOR
+
+William Wu
