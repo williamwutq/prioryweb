@@ -17,7 +17,7 @@ let main = function (argv) {
     // These are ignored
     if (argv.length < 3) {
         console.log("Usage: node cp32de.js <input_file> <output_file>")
-        console.log("This program deencodes a single input .tgvz (Compressed Tag Vector) into a decoded output .tgss (Storage Tag Source) file using the custom base32 encoding.");
+        console.log("This program decodes a single input .tgvz (Compressed Tag Vector) into a decoded output .tgss (Storage Tag Source) file using the custom base32 encoding.");
         process.exit(0);
     }
     if (argv.length < 4) {
