@@ -5,7 +5,7 @@ A search engine for resources in Priory posted and hosted by people we care.
 
 Sponsored and built by **William Wu**, Priory Class of 2027
 
-Link to public-facing website: (prioryweb.com)[https://www.prioryweb.com]
+Link to public-facing website: (prioryweb.com)[https://prioryweb.com]
 
 ## Development
 
