@@ -30,6 +30,30 @@ header, footer {
     flex-direction: row;
 }
 
+div.toast {
+    display: none;
+    visibility: hidden;
+    min-width: 250px;
+    background-color: var(--color-dark);
+    color: var(--light);
+    text-align: center;
+    border-radius: 15px;
+    min-height: 30px;
+    line-height: 30px;
+    position: fixed;
+    z-index: 1;
+    right: 45px;
+    bottom: 45px;
+    font-size: 15px;
+    align-items: center;
+    animation: fadein 1s, fadeout 1s 2.5s;
+}
+
+div.toast.show {
+    display: block;
+    visibility: visible;
+}
+
 .capsule, .shadowed-capsule {
     display: block;
     position: fixed;
