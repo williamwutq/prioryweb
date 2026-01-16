@@ -1,7 +1,620 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-</head>
-<body>
-    
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dorm Improvement Projects</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #37353e;
+        --muted: #44444e;
+        --paper: #d3dad9;
+        --accent: #715a5a;
+        --accent-dark: #d3dad9;
+        --hero-image: url("https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80");
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", sans-serif;
+        color: var(--paper);
+        background: radial-gradient(
+          circle at top,
+          #2f2e36,
+          #24232b 65%,
+          #1c1b22
+        );
+        line-height: 1.6;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "Playfair Display", serif;
+        margin: 0 0 0.4em;
+      }
+
+      h2 {
+        font-size: clamp(2.1rem, 3.4vw, 3.2rem);
+        text-align: center;
+      }
+
+      .mission-grid h2 {
+        font-size: 2rem;
+        text-align: left;
+      }
+
+      a {
+        color: var(--paper);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--accent);
+      }
+
+      .container {
+        width: min(1100px, 92vw);
+        margin: 0 auto;
+      }
+
+      .hero {
+        background: linear-gradient(
+            rgba(31, 30, 37, 0.72),
+            rgba(31, 30, 37, 0.72)
+          ),
+          var(--hero-image) center/cover no-repeat;
+        color: var(--paper);
+        padding: 5.5rem 0 6rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0));
+        pointer-events: none;
+      }
+
+      .hero-inner {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        gap: 1.5rem;
+        text-align: center;
+        justify-items: center;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.4rem, 4vw, 3.8rem);
+        letter-spacing: 0.02em;
+      }
+
+      .hero p {
+        max-width: 520px;
+        margin: 0;
+        color: #f0f3f2;
+      }
+
+
+      section {
+        padding: 2.45rem 0;
+      }
+
+      .panel {
+        background: rgba(55, 53, 62, 0.65);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 24px 55px -40px rgba(0, 0, 0, 0.3);
+      }
+
+      .mission-grid {
+        display: grid;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .mission-highlight {
+        background: linear-gradient(135deg, var(--accent), var(--ink));
+        border-radius: 20px;
+        padding: 1.75rem;
+        color: #f2f3f2;
+        font-weight: 500;
+      }
+
+      .people-grid {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .person-card {
+        background: rgba(68, 68, 78, 0.85);
+        border-radius: 18px;
+        padding: 1.5rem;
+        display: grid;
+        gap: 1rem;
+        box-shadow: 0 18px 35px -30px rgba(0, 0, 0, 0.4);
+        animation: fadeUp 0.8s ease forwards;
+        opacity: 0;
+      }
+
+      .person-card:nth-child(2) {
+        animation-delay: 0.12s;
+      }
+
+      .person-card:nth-child(3) {
+        animation-delay: 0.24s;
+      }
+
+      .person-card:nth-child(4) {
+        animation-delay: 0.36s;
+      }
+
+      .person-card:nth-child(5) {
+        animation-delay: 0.48s;
+      }
+
+      .person-photo {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        border-radius: 14px;
+        object-fit: cover;
+        background: var(--ink);
+      }
+
+      .role {
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .projects-grid {
+        display: grid;
+        gap: 1.6rem;
+      }
+
+      .project-banner {
+        position: relative;
+        border-radius: 22px;
+        aspect-ratio: 1 / 1;
+        padding: 1.8rem;
+        display: grid;
+        align-content: end;
+        justify-items: center;
+        gap: 0.75rem;
+        color: var(--paper);
+        background: center/cover no-repeat;
+        overflow: hidden;
+        box-shadow: 0 24px 45px -30px rgba(0, 0, 0, 0.65);
+        text-align: center;
+      }
+
+      .project-banner h3,
+      .project-banner p {
+        text-align: center;
+      }
+
+      .project-banner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(31, 30, 37, 0.8),
+          rgba(31, 30, 37, 0.35)
+        );
+      }
+
+      .project-banner > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .project-cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        background: var(--accent);
+        color: #f7f6f4;
+        padding: 0.5rem 1.1rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+
+      .project-cta:hover {
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      .project-detail {
+        background: transparent;
+        border-radius: 0;
+        padding: 0 0 2.5rem;
+        display: grid;
+        gap: 1rem;
+        box-shadow: none;
+        border: none;
+      }
+
+      .project-detail h3 {
+        font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+        margin-bottom: 0;
+        text-align: center;
+      }
+
+      .project-detail p {
+        text-align: center;
+      }
+
+      .project-details-grid {
+        display: grid;
+        gap: 3rem;
+      }
+
+      .full-width {
+        width: 100%;
+        padding: 0 6vw;
+      }
+
+      .project-details-wrap {
+        padding: 0 2.5vw;
+      }
+
+      .detail-gallery {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      .detail-gallery.grid-2x2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .detail-gallery img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 0;
+        object-fit: cover;
+        background: var(--ink);
+      }
+
+      .project-links {
+        display: none;
+      }
+
+      .upload-slot {
+        font-size: 0.85rem;
+        color: #b8b8c0;
+      }
+
+      footer {
+        padding: 2rem 0 3rem;
+        text-align: center;
+        color: #b8b8c0;
+        font-size: 0.9rem;
+      }
+
+      @keyframes fadeUp {
+        from {
+          transform: translateY(18px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @media (min-width: 800px) {
+        .mission-grid {
+          grid-template-columns: 1.4fr 1fr;
+        }
+
+        .people-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .people-grid.founders {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .projects-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="container hero-inner">
+        <h1>Dorm Improvement Projects</h1>
+        <p>
+          A student-led group rebuilding dorm life with smarter spaces, cozier
+          corners, and community-first upgrades.
+        </p>
+      </div>
+    </header>
+
+    <section>
+      <div class="container panel mission-grid">
+        <div>
+          <h2>Our Mission</h2>
+          <p>
+            We design, build, and advocate for dorm improvements that make daily
+            life healthier, more sustainable, and more connected. Every project
+            is rooted in student feedback and hands-on collaboration.
+          </p>
+        </div>
+        <div class="mission-highlight">
+          Small changes, big impact: lighting, storage, study zones, and the
+          shared spaces that bring us together.
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <h2>Founders</h2>
+        <p class="upload-slot">
+          Replace the placeholder photos and descriptions with your own.
+        </p>
+        <div class="people-grid founders">
+          <article class="person-card">
+            <img
+              class="person-photo"
+              src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=800&q=80"
+              alt="Founder photo slot"
+            />
+            <div>
+              <div class="role">Co-Founder</div>
+              <h3>Founder Name</h3>
+              <p>
+                Short bio or role description. Highlight leadership, design
+                focus, or community engagement.
+              </p>
+            </div>
+          </article>
+          <article class="person-card">
+            <img
+              class="person-photo"
+              src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
+              alt="Founder photo slot"
+            />
+            <div>
+              <div class="role">Co-Founder</div>
+              <h3>Founder Name</h3>
+              <p>
+                Add a short description of this founder's strengths, project
+                leadership, and vision for the dorm community.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <h2>Team Members</h2>
+        <div class="people-grid">
+          <article class="person-card">
+            <img
+              class="person-photo"
+              src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=800&q=80"
+              alt="Team member photo slot"
+            />
+            <div>
+              <div class="role">Operations</div>
+              <h3>Member Name</h3>
+              <p>Describe their role, skills, and what they contribute.</p>
+            </div>
+          </article>
+          <article class="person-card">
+            <img
+              class="person-photo"
+              src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
+              alt="Team member photo slot"
+            />
+            <div>
+              <div class="role">Design</div>
+              <h3>Member Name</h3>
+              <p>Describe their role, skills, and what they contribute.</p>
+            </div>
+          </article>
+          <article class="person-card">
+            <img
+              class="person-photo"
+              src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=800&q=80"
+              alt="Team member photo slot"
+            />
+            <div>
+              <div class="role">Community</div>
+              <h3>Member Name</h3>
+              <p>Describe their role, skills, and what they contribute.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="full-width">
+        <h2 class="section-title">Project Directory</h2>
+        <div class="projects-grid">
+          <article
+            class="project-banner"
+            style="
+              background-image: url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80');
+            "
+          >
+            <h3>Project Name</h3>
+            <p>Short tagline for the project or what it improves.</p>
+            <a class="project-cta" href="#project-1">Click here for more information</a>
+          </article>
+          <article
+            class="project-banner"
+            style="
+              background-image: url('https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80');
+            "
+          >
+            <h3>Project Name</h3>
+            <p>Short tagline for the project or what it improves.</p>
+            <a class="project-cta" href="#project-2">Click here for more information</a>
+          </article>
+          <article
+            class="project-banner"
+            style="
+              background-image: url('https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1200&q=80');
+            "
+          >
+            <h3>Project Name</h3>
+            <p>Short tagline for the project or what it improves.</p>
+            <a class="project-cta" href="#project-3">Click here for more information</a>
+          </article>
+          <article
+            class="project-banner"
+            style="
+              background-image: url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=80');
+            "
+          >
+            <h3>Project Name</h3>
+            <p>Short tagline for the project or what it improves.</p>
+            <a class="project-cta" href="#project-4">Click here for more information</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="project-details">
+      <div class="full-width project-details-wrap">
+        <div class="project-details-grid">
+          <article class="project-detail" id="project-1">
+            <h3>Project Name</h3>
+            <p>
+              Add a full description, goals, timeline, and outcomes. Share who
+              it helps and what the dorm looks like after the upgrade.
+            </p>
+            <div class="detail-gallery grid-2x2">
+              <img
+                src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+            </div>
+          </article>
+          <article class="project-detail" id="project-2">
+            <h3>Project Name</h3>
+            <p>
+              Add a full description, goals, timeline, and outcomes. Share who
+              it helps and what the dorm looks like after the upgrade.
+            </p>
+            <div class="detail-gallery grid-2x2">
+              <img
+                src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+            </div>
+          </article>
+          <article class="project-detail" id="project-3">
+            <h3>Project Name</h3>
+            <p>
+              Add a full description, goals, timeline, and outcomes. Share who
+              it helps and what the dorm looks like after the upgrade.
+            </p>
+            <div class="detail-gallery grid-2x2">
+              <img
+                src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+            </div>
+          </article>
+          <article class="project-detail" id="project-4">
+            <h3>Project Name</h3>
+            <p>
+              Add a full description, goals, timeline, and outcomes. Share who
+              it helps and what the dorm looks like after the upgrade.
+            </p>
+            <div class="detail-gallery grid-2x2">
+              <img
+                src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80"
+                alt="Project detail image slot"
+              />
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <footer>© 2026 Dorm Improvement Projects. All rights reserved.</footer>
+  </body>
+</html>
+      .section-title {
+        text-align: center;
+        font-size: clamp(1.9rem, 3vw, 2.8rem);
+      }
