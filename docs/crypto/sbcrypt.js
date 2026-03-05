@@ -123,9 +123,21 @@ function shuffleInPlace(arr) {
 /**
  * Encrypt an array of { key, string } entries.
  * Returns a Uint8Array blob of M × 124-byte units in random order.
+ * 
+ * Note: For small and variable numbers of entries, it is recommended to use encryptWithNoise() instead to add an additional
+ * noise entry that obfuscates the length and distribution of the real entries, which can be vulnerable to length-based attacks.
+ * Not only this, small strings also mean that the entropy of the blob will be low, since there are no way to create entropy from
+ * the void, but only redistribute it to increase entropy per byte. The noise entry can be generated with a random key and a random 
+ * string of length proportional to the total length of the real entries.
  *
- * @param {Array<{ key: string, string: string }>} entries
- * @returns {Promise<Uint8Array>}
+ * @param {Array<{ key: string, string: string }>} entries The entries to encrypt, each with a key and a string value
+ * @returns {Promise<Uint8Array>} A Uint8Array blob of encrypted data, containing blocks in random order.
+ * @example
+ * const blob = await encrypt([
+ *  { key: "alice-secret", string: "Hello from Alice" },
+ *  { key: "bob-secret",   string: "Hello from Bob"   },
+ *  { key: "carol-secret", string: "Hello from Carol" },
+ * ]);
  */
 export async function encrypt(entries) {
   const encoder = new TextEncoder();
