@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto - HMAC-Keyed Encryption</title>
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Nunito Sans', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .content {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 2px solid var(--color-dark);
+        }
+
+        .column-title {
+            font-family: 'Lato', sans-serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--color-dark);
+            margin-bottom: 5px;
+        }
+
+        .left-column {
+            flex: 0 1 40%;
+        }
+
+        .right-column {
+            flex: 0 1 60%;
+        }
+
+        .entry-block {
+            padding: 10px;
+            background-color: var(--white);
+            border: 1px solid var(--accent-dark);
+            gap: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .entry-block.empty {
+            padding: 15px;
+            text-align: center;
+            color: var(--dark);
+            font-size: 0.9em;
+            background-color: var(--light);
+            border: 1px dashed var(--accent-dark);
+        }
+
+        .key-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid var(--accent-medium);
+            background-color: var(--white);
+            color: var(--dark);
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 0.9em;
+        }
+
+        .string-textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid var(--accent-medium);
+            background-color: var(--white);
+            color: var(--dark);
+            font-family: monospace;
+            font-size: 0.85em;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .entry-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .entry-btn {
+            flex: 1;
+            padding: 4px 8px;
+            background-color: var(--accent-dark);
+            color: var(--light);
+            border: none;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .entry-btn:hover {
+            background-color: var(--accent-medium);
+        }
+
+        .entry-btn.remove {
+            background-color: var(--error);
+        }
+
+        .entry-btn.remove:hover {
+            background-color: var(--error-dark);
+        }
+
+        .add-entry-btn {
+            padding: 8px 12px;
+            background-color: var(--color-dark);
+            color: var(--light);
+            border: none;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 5px;
+        }
+
+        .add-entry-btn:hover {
+            background-color: var(--color-medium);
+        }
+
+        .encrypted-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--accent-medium);
+            background-color: var(--white);
+            color: var(--dark);
+            font-family: monospace;
+            font-size: 0.85em;
+            resize: vertical;
+            flex: 1;
+            min-height: 100px;
+        }
+
+        .bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .bottom .right {
+            font-size: 1.2em;
+        }
+
+        .main-btn {
+            padding: 10px 30px;
+            background-color: var(--color-dark);
+            color: var(--light);
+            border: none;
+            font-family: 'Lato', sans-serif;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            min-width: 150px;
+        }
+
+        .main-btn:hover {
+            background-color: var(--color-medium);
+        }
+
+        .main-btn.decrypt {
+            background-color: var(--accent-dark);
+        }
+
+        .main-btn.decrypt:hover {
+            background-color: var(--accent-medium);
+        }
+
+        .disclaimer {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 0;
+            font-size: 0.85em;
+            display: none;
+        }
+
+        .status-message.visible {
+            display: block;
+        }
+
+        .status-message.success {
+            background-color: var(--accent-light);
+            color: var(--accent-dark);
+        }
+
+        .status-message.error {
+            background-color: var(--error);
+            color: var(--light);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .modal-overlay.visible {
+            display: block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--white);
+            border: 2px solid var(--color-dark);
+            padding: 20px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal.visible {
+            display: block;
+        }
+
+        .modal-title {
+            font-family: 'Lato', sans-serif;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--color-dark);
+            margin-bottom: 15px;
+        }
+
+        .modal-content {
+            font-family: 'Nunito Sans', sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            margin-bottom: 10px;
+        }
+
+        .modal-content strong {
+            color: var(--error);
+        }
+
+        .close-modal-btn {
+            padding: 10px 20px;
+            background-color: var(--color-dark);
+            color: var(--light);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .close-modal-btn:hover {
+            background-color: var(--color-medium);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="column left-column">
+                <div class="column-title">Keys & Strings</div>
+                <button class="add-entry-btn" onclick="addEntry()">+ Add Entry</button>
+                <div id="entries-container"></div>
+            </div>
+
+            <div class="column right-column">
+                <div class="column-title">Encrypted Data (Base64)</div>
+                <textarea id="encrypted-blob" class="encrypted-textarea" placeholder="Encrypted data will appear here..."></textarea>
+            </div>
+        </div>
+
+        <div id="status-message" class="status-message"></div>
+
+        <div class="bottom">
+            <div class="controls">
+                <button class="main-btn" onclick="encryptAll()">ENCRYPT</button>
+                <button class="main-btn decrypt" onclick="decryptAll()">DECRYPT</button>
+                <button class="main-btn disclaimer" onclick="showDisclaimer()">DISCLAIMER</button>
+            </div>
+
+            <div class="right color-text">
+                <a> Made by William Wu with Claude </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="disclaimer-overlay" class="modal-overlay" onclick="closeDisclaimer()"></div>
+    <div id="disclaimer-modal" class="modal">
+        <div class="modal-title">⚠️ Important Disclaimer</div>
+        <div class="modal-content">
+            <p><strong>Do not use this web app to encrypt secrets.</strong></p>
+            <p>Although we do not use cookies and do not collect any data, using a web application for encrypting sensitive information is fundamentally insecure and not recommended.</p>
+            <p>While the encryption algorithm itself is cryptographically sound, the JavaScript environment is not secure enough for protecting important secrets. Browser JavaScript can be compromised, intercepted, or modified in transit.</p>
+            <p><strong>For any important purposes:</strong></p>
+            <ul style="margin: 10px 0 10px 20px; color: var(--dark);">
+                <li>Use a native implementation (desktop/CLI tools)</li>
+                <li>Follow the security recommendations in their official documentation</li>
+                <li>Never trust web-based encryption for sensitive data</li>
+            </ul>
+            <p>This webapp is provided for educational and convenience purposes only. For security usage with sensitive data, use proper cryptographic tools, read documentation from relevant libraries that may implement this algorithm, and follow best practices for secure encryption.</p>
+            <p><strong>The Algorithm</strong></p>
+            <p>This is a Secure HMAC-Keyed Block-Based Multi-String Encryption Algorithm. It is designed to securely encrypt multiple strings with separate keys, while producing a single indistinguishable encrypted blob. Each string is padded, tagged, encrypted, and shuffled together, so that no information about the original strings or their keys can be inferred from the encrypted data.</p>
+            <p>Encryption takes n strings and n keys, pads each string into fixed-size blocks, tags each block with a secret marker derived from its key and position, encrypts every block, then shuffles them all together into one indistinguishable blob. Decryption scans the entire blob with a given key, silently discarding every block that fails authentication, and uses the recovered position indices to reassemble the original string. No block reveals which string it belongs to, and no key grants any foothold into another string's blocks.</p>
+            <p>The algorithm is intended to provide a means for secure information distribution and plausible deniability, where multiple parties can be given different keys to access only the information they are authorized for, without revealing the structure or existence of other information.</p>
+            <p>Technical information: <code><pre>
+- Key Derivation: HKDF-SHA256, unsalted
+- Block Tagging: HMAC-SHA256 with HMAC subkey
+- Encryption: AES-256-GCM with encryption subkey, 96-bit nonce, 128-bit tag
+- Padding: PKCS#7 to 64-byte blocks
+- Randomization: Fisher-Yates shuffle with crypto.getRandomValues()
+- Resulting Block Size: 124 bytes
+            </pre></code></p>
+        </div>
+        <button class="close-modal-btn" onclick="closeDisclaimer()">Close</button>
+    </div>
+
+    <script type="module">
+        import { encrypt, encryptWithNoise, decryptText } from './crypto/sbcrypt.js';
+
+        let entryCount = 0;
+
+        window.addEntry = function() {
+            const container = document.getElementById('entries-container');
+            const entryId = entryCount++;
+            
+            const entryBlock = document.createElement('div');
+            entryBlock.className = 'entry-block';
+            entryBlock.id = `entry-${entryId}`;
+            
+            entryBlock.innerHTML = `
+                <input type="text" class="key-input" placeholder="Key" data-key-input="${entryId}">
+                <textarea class="string-textarea" placeholder="String content" data-string-input="${entryId}"></textarea>
+                <div class="entry-controls">
+                    <button class="entry-btn" onclick="copyToClipboard('entry-${entryId}')">Copy</button>
+                    <button class="entry-btn remove" onclick="removeEntry('entry-${entryId}')">Remove</button>
+                </div>
+            `;
+            
+            container.appendChild(entryBlock);
+        };
+
+        window.removeEntry = function(entryId) {
+            const entry = document.getElementById(entryId);
+            if (entry) {
+                entry.remove();
+            }
+            updateEmptyState();
+        };
+
+        window.copyToClipboard = function(entryId) {
+            const entry = document.getElementById(entryId);
+            const keyInput = entry.querySelector('.key-input');
+            const stringTextarea = entry.querySelector('.string-textarea');
+            const text = `Key: ${keyInput.value}\nString: ${stringTextarea.value}`;
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus('Copied to clipboard', 'success');
+            }).catch(() => {
+                showStatus('Failed to copy', 'error');
+            });
+        };
+
+        window.encryptAll = async function() {
+            const entries = [];
+            const container = document.getElementById('entries-container');
+            const entryElements = container.querySelectorAll('.entry-block');
+            
+            if (entryElements.length === 0) {
+                showStatus('Please add at least one entry', 'error');
+                return;
+            }
+            
+            for (const entryEl of entryElements) {
+                const keyInput = entryEl.querySelector('.key-input');
+                const stringTextarea = entryEl.querySelector('.string-textarea');
+                
+                if (keyInput.value.trim() && stringTextarea.value.trim()) {
+                    entries.push({
+                        key: keyInput.value,
+                        string: stringTextarea.value
+                    });
+                }
+            }
+            
+            if (entries.length === 0) {
+                showStatus('Please fill in all key and string fields', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('Encrypting...', 'success');
+                
+                const totalLength = entries.reduce((sum, e) => sum + e.string.length, 0);
+                let noiseParam = { high: 0.3, low: 0.6 };
+                
+                if (totalLength < 2048) {
+                    noiseParam = { length: 2048 };
+                }
+                
+                const blob = await encryptWithNoise(entries, noiseParam);
+                const base64 = btoa(String.fromCharCode.apply(null, blob));
+                
+                document.getElementById('encrypted-blob').value = base64;
+                showStatus('Encryption successful', 'success');
+            } catch (error) {
+                showStatus(`Encryption failed: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        window.decryptAll = async function() {
+            const base64String = document.getElementById('encrypted-blob').value.trim();
+            
+            if (!base64String) {
+                showStatus('Please enter encrypted data', 'error');
+                return;
+            }
+            
+            const container = document.getElementById('entries-container');
+            const entryElements = container.querySelectorAll('.entry-block');
+            
+            if (entryElements.length === 0) {
+                showStatus('Please add at least one key', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('Decrypting...', 'success');
+                
+                const binaryString = atob(base64String);
+                const blob = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    blob[i] = binaryString.charCodeAt(i);
+                }
+                
+                // Clear all string textareas first
+                for (const entryEl of entryElements) {
+                    const stringTextarea = entryEl.querySelector('.string-textarea');
+                    stringTextarea.value = '';
+                }
+                
+                // Attempt to decrypt for each key
+                for (const entryEl of entryElements) {
+                    const keyInput = entryEl.querySelector('.key-input');
+                    const stringTextarea = entryEl.querySelector('.string-textarea');
+                    const key = keyInput.value.trim();
+                    
+                    if (!key) continue;
+                    
+                    try {
+                        const decrypted = await decryptText(blob, key);
+                        if (decrypted !== null) {
+                            stringTextarea.value = decrypted;
+                        }
+                    } catch (error) {
+                        // Failed to decrypt, leave textarea empty
+                    }
+                }
+                
+                showStatus('Decryption complete', 'success');
+            } catch (error) {
+                showStatus(`Decryption failed: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+
+
+        window.showStatus = function(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message visible ${type}`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.classList.remove('visible');
+                }, 3000);
+            }
+        };
+
+        window.updateEmptyState = function() {
+            const container = document.getElementById('entries-container');
+            const existing = container.querySelector('.entry-block');
+            if (!existing && container.children.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'entry-block empty';
+                empty.textContent = 'No entries yet. Click "Add Entry" to get started.';
+                container.appendChild(empty);
+            }
+        };
+
+        window.showDisclaimer = function() {
+            document.getElementById('disclaimer-overlay').classList.add('visible');
+            document.getElementById('disclaimer-modal').classList.add('visible');
+        };
+
+        window.closeDisclaimer = function() {
+            document.getElementById('disclaimer-overlay').classList.remove('visible');
+            document.getElementById('disclaimer-modal').classList.remove('visible');
+        };
+
+        // Initialize with one empty entry
+        addEntry();
+    </script>
+</body>
+</html>
