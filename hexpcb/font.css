@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  /* ── Families ─────────────────────────────────────── */
+  --font-ui:      'Space Mono', 'Courier New', 'Lucida Console', monospace;
+  --font-display: 'Space Mono', monospace;
+  --font-mono:    'Space Mono', 'Courier New', monospace;
+
+  /* ── Sizes ───────────────────────────────────────── */
+  --font-size-2xs:  9px;
+  --font-size-xs:   10px;
+  --font-size-sm:   11px;
+  --font-size-base: 12px;
+  --font-size-md:   13px;
+  --font-size-lg:   15px;
+  --font-size-xl:   18px;
+  --font-size-2xl:  24px;
+  --font-size-3xl:  32px;
+
+  /* ── Weights ─────────────────────────────────────── */
+  --font-weight-regular: 400;
+  --font-weight-bold:    700;
+
+  /* ── Line Heights ────────────────────────────────── */
+  --line-height-none:    1;
+  --line-height-tight:   1.2;
+  --line-height-snug:    1.35;
+  --line-height-base:    1.5;
+  --line-height-relaxed: 1.7;
+
+  /* ── Letter Spacing ──────────────────────────────── */
+  --letter-spacing-tight:  -0.03em;
+  --letter-spacing-normal:  0;
+  --letter-spacing-wide:    0.06em;
+  --letter-spacing-wider:   0.12em;
+  --letter-spacing-widest:  0.20em;
+}
