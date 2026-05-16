@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HexPCB</title>
+  <link rel="stylesheet" href="color.css">
+  <link rel="stylesheet" href="font.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ╔══════════════════════════════════════════════════╗ -->
+  <!-- ║  TOP BAR                                         ║ -->
+  <!-- ╚══════════════════════════════════════════════════╝ -->
+  <header id="top-bar">
+
+    <div id="app-brand">
+      <svg id="hex-logo" viewBox="0 0 26 30" width="18" height="20" aria-hidden="true">
+        <polygon
+          points="13,1 25,7.5 25,22.5 13,29 1,22.5 1,7.5"
+          fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linejoin="round"/>
+        <polygon
+          points="13,8 19,11.5 19,18.5 13,22 7,18.5 7,11.5"
+          fill="currentColor" opacity="0.25"/>
+      </svg>
+      <span id="app-title">HexPCB</span>
+    </div>
+
+    <div id="top-center">
+      <div id="field-toggles" aria-label="Field visualization">
+        <button class="toggle-btn" id="btn-toggle-b" aria-pressed="false">
+          <span class="toggle-icon field-b">⬡</span>
+          B&thinsp;Field
+        </button>
+        <button class="toggle-btn active" id="btn-toggle-e" aria-pressed="true">
+          <span class="toggle-icon field-e">⬡</span>
+          E&thinsp;Field
+        </button>
+      </div>
+    </div>
+
+    <div id="top-right">
+      <div id="run-controls" aria-label="Run inputs">
+        <div class="run-item">
+          <span class="run-label">IN&thinsp;1</span>
+          <span class="run-status complete" title="Condition met">✓</span>
+          <button class="run-btn">▶&ensp;Run</button>
+        </div>
+        <div class="run-item">
+          <span class="run-label">IN&thinsp;2</span>
+          <span class="run-status pending" title="Pending">…</span>
+          <button class="run-btn">▶&ensp;Run</button>
+        </div>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- ╔══════════════════════════════════════════════════╗ -->
+  <!-- ║  MAIN AREA                                       ║ -->
+  <!-- ╚══════════════════════════════════════════════════╝ -->
+  <div id="main">
+
+    <!-- ── Toolbar ──────────────────────────────────── -->
+    <nav id="toolbar" aria-label="Editing modes">
+
+      <div class="tool-group">
+        <button class="tool-btn" data-mode="pan" title="Pan  [Space to hold]">
+          <svg class="tool-icon" viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+            <path d="M10 2l2 3H8zm0 16l-2-3h4zm2-10h3l-3-2zm-4 0H5l3-2zm6 2v3l-3-3h3zm0 0v-3l-3 3h3zM4 10v3l3-3H4zm0 0V7l3 3H4z"/>
+            <circle cx="10" cy="10" r="2"/>
+          </svg>
+          <span class="tool-label">Pan</span>
+        </button>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn active" data-mode="draw" title="Draw traces on active layer">
+          <svg class="tool-icon" viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+            <path d="M3 17l1.5-4L14 3.5 16.5 6 7 15.5zm8.5-11l2 2-7 7-2-2z"/>
+            <circle cx="15.5" cy="4.5" r="2"/>
+          </svg>
+          <span class="tool-label">Draw</span>
+        </button>
+        <button class="tool-btn" data-mode="erase" title="Erase traces">
+          <svg class="tool-icon" viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+            <path d="M4 16h5l7.5-7.5-5-5L4 11zm2-3.5L13.5 5l2 2L8 14.5z"/>
+            <path d="M4 16h5v1H4z" opacity="0.5"/>
+          </svg>
+          <span class="tool-label">Erase</span>
+        </button>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" data-mode="place" title="Place component">
+          <svg class="tool-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polygon points="10,2 18,6.5 18,13.5 10,18 2,13.5 2,6.5" stroke-linejoin="round"/>
+            <line x1="10" y1="7" x2="10" y2="13"/>
+            <line x1="7" y1="10" x2="13" y2="10"/>
+          </svg>
+          <span class="tool-label">Place</span>
+        </button>
+        <button class="tool-btn" data-mode="delete" title="Delete component">
+          <svg class="tool-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polygon points="10,2 18,6.5 18,13.5 10,18 2,13.5 2,6.5" stroke-linejoin="round"/>
+            <line x1="7" y1="10" x2="13" y2="10"/>
+          </svg>
+          <span class="tool-label">Delete</span>
+        </button>
+        <button class="tool-btn" data-mode="move" title="Move component">
+          <svg class="tool-icon" viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+            <path d="M10 3l-2 3h4zm0 14l2-3H8zM3 10l3 2V8zm14 0l-3-2v4zM8 8h4v4H8z"/>
+          </svg>
+          <span class="tool-label">Move</span>
+        </button>
+        <button class="tool-btn" data-mode="rotate" title="Rotate component (6 × 60°)">
+          <svg class="tool-icon" viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+            <path d="M10 4a6 6 0 1 0 5.2 3H13l3-4 3 4h-2.1A8 8 0 1 1 10 2z"/>
+          </svg>
+          <span class="tool-label">Rotate</span>
+        </button>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" data-mode="inspect" title="Inspect component or trace">
+          <svg class="tool-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="8.5" cy="8.5" r="5.5"/>
+            <line x1="12.5" y1="12.5" x2="17" y2="17"/>
+            <line x1="8.5" y1="6" x2="8.5" y2="11"/>
+            <line x1="6" y1="8.5" x2="11" y2="8.5"/>
+          </svg>
+          <span class="tool-label">Inspect</span>
+        </button>
+      </div>
+
+    </nav>
+
+    <!-- ── Canvas Area ──────────────────────────────── -->
+    <div id="canvas-wrap">
+      <canvas id="game-canvas" aria-label="HexPCB game grid"></canvas>
+    </div>
+
+    <!-- ── Side Panel ───────────────────────────────── -->
+    <aside id="side-panel" aria-label="Component panel">
+
+      <!-- Component Picker (visible in Place mode) -->
+      <section id="component-picker" class="panel-section">
+        <div class="panel-header">
+          <span class="panel-title">Components</span>
+        </div>
+        <div class="panel-body">
+
+          <div class="comp-group">
+            <div class="comp-group-title">Connections</div>
+            <div class="comp-list">
+              <button class="comp-btn">Ground Via</button>
+              <button class="comp-btn">Power Via</button>
+              <button class="comp-btn">Input Via</button>
+              <button class="comp-btn">Output Via</button>
+              <button class="comp-btn">Via</button>
+              <button class="comp-btn">Junction</button>
+              <button class="comp-btn">Crossover</button>
+            </div>
+          </div>
+
+          <div class="comp-group">
+            <div class="comp-group-title">Passive</div>
+            <div class="comp-list">
+              <button class="comp-btn selected">S. Resistor</button>
+              <button class="comp-btn">S. Inductor</button>
+              <button class="comp-btn">V. Inductor</button>
+              <button class="comp-btn">S.P. Cap.</button>
+              <button class="comp-btn">3S Cap.</button>
+              <button class="comp-btn">Potentiometer</button>
+            </div>
+          </div>
+
+          <div class="comp-group">
+            <div class="comp-group-title">Active</div>
+            <div class="comp-list">
+              <button class="comp-btn">S. Diode</button>
+              <button class="comp-btn">Zener Diode</button>
+              <button class="comp-btn">NPN BJT</button>
+              <button class="comp-btn">PNP BJT</button>
+              <button class="comp-btn">Switch</button>
+              <button class="comp-btn">Button</button>
+            </div>
+          </div>
+
+          <div class="comp-group">
+            <div class="comp-group-title">Field Sources</div>
+            <div class="comp-list">
+              <button class="comp-btn">S. Magnet</button>
+              <button class="comp-btn">V. Magnet</button>
+              <button class="comp-btn">Charged Ball</button>
+            </div>
+          </div>
+
+          <div class="comp-group">
+            <div class="comp-group-title">Sensors &amp; Display</div>
+            <div class="comp-list">
+              <button class="comp-btn">Voltmeter</button>
+              <button class="comp-btn">Ammeter</button>
+              <button class="comp-btn">Wave Display</button>
+              <button class="comp-btn">Signal Display</button>
+              <button class="comp-btn">Signal Input</button>
+              <button class="comp-btn">V. E-Field Sensor</button>
+              <button class="comp-btn">Planar E-Field</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Inspector (visible in Inspect mode) -->
+      <section id="inspect-panel" class="panel-section hidden">
+        <div class="panel-header">
+          <span class="panel-title">Inspector</span>
+          <span class="panel-subtitle">Simple Resistor</span>
+        </div>
+        <div class="panel-body">
+
+          <div class="inspect-location">
+            <span class="inspect-key">Cell</span>
+            <span class="inspect-val">q:&thinsp;3,&ensp;r:&thinsp;&minus;2,&ensp;layer&thinsp;2</span>
+          </div>
+          <div class="inspect-location">
+            <span class="inspect-key">Type&nbsp;A</span>
+            <span class="inspect-val">3-hex line, rot&thinsp;1</span>
+          </div>
+
+          <div class="inspect-divider"></div>
+
+          <div class="inspect-params">
+            <div class="param-row">
+              <label class="param-label" for="param-resistance">Resistance&thinsp;(Ω)</label>
+              <input class="param-input" id="param-resistance" type="number"
+                     value="1000" min="0" step="1">
+            </div>
+          </div>
+
+          <div class="inspect-divider"></div>
+
+          <div class="inspect-readings">
+            <div class="reading-row">
+              <span class="reading-key">V&thinsp;drop</span>
+              <span class="reading-val">3.302&thinsp;V</span>
+            </div>
+            <div class="reading-row">
+              <span class="reading-key">Current</span>
+              <span class="reading-val">3.302&thinsp;mA</span>
+            </div>
+            <div class="reading-row">
+              <span class="reading-key">Power</span>
+              <span class="reading-val">10.90&thinsp;mW</span>
+            </div>
+            <div class="reading-row">
+              <span class="reading-key">Status</span>
+              <span class="reading-val reading-active">Active</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </aside>
+
+  </div><!-- #main -->
+
+  <!-- ╔══════════════════════════════════════════════════╗ -->
+  <!-- ║  BOTTOM BAR                                      ║ -->
+  <!-- ╚══════════════════════════════════════════════════╝ -->
+  <footer id="bottom-bar">
+
+    <div id="layer-selector" aria-label="Active layer">
+      <span class="layer-selector-label">Layer</span>
+      <button class="layer-btn" data-layer="1" title="Layer 1 — Red">1</button>
+      <button class="layer-btn active" data-layer="2" title="Layer 2 — Green (active)">2</button>
+      <button class="layer-btn" data-layer="3" title="Layer 3 — Blue">3</button>
+      <button class="layer-btn" data-layer="4" title="Layer 4 — Yellow">4</button>
+    </div>
+
+    <div id="status-bar" aria-live="polite">
+      <span class="status-item" id="status-coords">q:&thinsp;0,&ensp;r:&thinsp;0</span>
+      <span class="status-sep">·</span>
+      <span class="status-item status-mode" id="status-mode">Draw</span>
+      <span class="status-sep">·</span>
+      <span class="status-item" id="status-zoom">100%</span>
+      <span class="status-sep">·</span>
+      <span class="status-item" id="status-nodes">0 nodes active</span>
+      <span class="status-sep">·</span>
+      <span class="status-item" id="status-tick">tick&thinsp;0</span>
+    </div>
+
+  </footer>
+
+</div><!-- #app -->
+</body>
+</html>
